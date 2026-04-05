@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>옵션 사이클 대시보드 v3</title>
+  <style>
+    :root {
+      --bg:#071126;
+      --panel:#0e1b3c;
+      --panel2:#101a34;
+      --line:#29407a;
+      --text:#edf3ff;
+      --muted:#b9c7ea;
+      --green:#31d96b;
+      --red:#ff6767;
+      --blue:#2d66ff;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+      background:linear-gradient(180deg,#061028 0%,#081433 100%); color:var(--text);
+    }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 16px; }
+    h1 { margin: 4px 0 8px; font-size: 34px; }
+    .sub { color: var(--muted); font-size: 16px; margin-bottom: 14px; }
+    .panel {
+      background: var(--panel2); border:1px solid var(--line); border-radius: 20px; padding: 16px; margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.22);
+    }
+    .grid { display:grid; grid-template-columns:1fr; gap:12px; }
+    .kpi-title { color: var(--muted); font-size: 15px; margin-bottom: 8px; }
+    .kpi-value { font-size: 28px; font-weight: 800; }
+    .green{color:var(--green)} .red{color:var(--red)}
+    .btn-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; }
+    button {
+      appearance:none; border:none; color:#fff; background:#1c2d5d; padding:12px 16px; border-radius:16px; font-size:17px; cursor:pointer;
+      min-height:46px;
+    }
+    button.primary { background: var(--blue); }
+    button.ghost { background: transparent; border:1px solid var(--line); color:var(--muted); }
+    .section-title { font-size: 28px; font-weight:800; margin:0 0 12px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:14px; margin-bottom:12px; }
+    .row2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .row4 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    label { display:block; color:var(--muted); font-size:14px; margin-bottom:6px; }
+    input, select {
+      width:100%; background:#09132b; color:#fff; border:1px solid #355099; border-radius:14px; padding:12px 14px; font-size:18px;
+    }
+    .topline { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+    .small { color:var(--muted); font-size:14px; }
+    .danger { background:#532323; }
+    table { width:100%; border-collapse:collapse; font-size:16px; }
+    th, td { padding:10px 8px; border-bottom:1px solid rgba(255,255,255,.08); text-align:left; }
+    th { color:var(--muted); font-weight:600; }
+    .scroll-x { overflow-x:auto; }
+    .note { color:var(--muted); font-size:15px; line-height:1.5; }
+    @media (min-width: 720px){ .grid { grid-template-columns:1fr 1fr; } .row4{grid-template-columns:repeat(4,1fr);} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>옵션 사이클 대시보드 v3</h1>
+    <div class="sub">간소화 버전 · 수동 입력 · 추가/삭제 확실히 작동 · 나중에 data.json 구조로 확장 가능</div>
+
+    <div class="panel">
+      <div class="section-title">빠른 작업</div>
+      <div class="btn-row">
+        <button class="primary" id="save-btn" type="button">현재 입력값 저장</button>
+        <button id="add-position-btn" type="button">포지션 추가</button>
+        <button id="add-contract-btn" type="button">계약 추가</button>
+        <button id="add-history-btn" type="button">누적행 추가</button>
+        <button class="ghost" id="reset-btn" type="button">샘플값 복원</button>
+      </div>
+      <div class="note" style="margin-top:12px;">지금은 수동 가격 버전입니다. 현재가, 평단, 주식수, 프리미엄을 직접 바꾸면 아래 숫자가 바로 다시 계산됩니다.</div>
+    </div>
+
+    <div class="grid">
+      <div class="panel"><div class="kpi-title">대표 현재가</div><div class="kpi-value" id="kpi-price">-</div></div>
+      <div class="panel"><div class="kpi-title">총 누적 프리미엄</div><div class="kpi-value green" id="kpi-premium">-</div></div>
+      <div class="panel"><div class="kpi-title">현재 주식 평가손익</div><div class="kpi-value" id="kpi-stock-pl">-</div></div>
+      <div class="panel"><div class="kpi-title">현재 총 평가값</div><div class="kpi-value" id="kpi-total">-</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">1) 포지션 입력</div>
+      <div id="positions"></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">2) 옵션 계약 입력</div>
+      <div id="contracts"></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">3) 누적 프리미엄 입력</div>
+      <div id="history"></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">4) 한눈 요약</div>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>티커</th><th>주식수</th><th>평단</th><th>현재가</th><th>주식손익</th><th>누적 프리미엄</th></tr>
+          </thead>
+          <tbody id="summary-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const defaultData = {
+      positions: [
+        { symbol: 'SOFI', shares: 15000, avgCost: 17.20, currentPrice: 16.50, cumulativePremium: 18500 },
+        { symbol: 'UNH', shares: 2000, avgCost: 270.00, currentPrice: 277.00, cumulativePremium: 44369 }
+      ],
+      contracts: [
+        { symbol: 'SOFI', expiry: '2026-04-10', type: 'CALL', strike: 16, contracts: 150, premiumReceived: 7500, currentOptionMark: 9600 },
+        { symbol: 'UNH', expiry: '2026-05-01', type: 'CALL', strike: 265, contracts: 20, premiumReceived: 44369, currentOptionMark: 17269 }
+      ],
+      premiumHistory: [
+        { cycle: '1차', note: '초기', premium: 18500 },
+        { cycle: '2차', note: 'UNH', premium: 44369 }
+      ]
+    };
+
+    let data = load();
+
+    function clone(v){ return JSON.parse(JSON.stringify(v)); }
+    function load(){
+      try {
+        const raw = localStorage.getItem('options_dashboard_v3_simple');
+        return raw ? JSON.parse(raw) : clone(defaultData);
+      } catch(e){ return clone(defaultData); }
+    }
+    function save(){ localStorage.setItem('options_dashboard_v3_simple', JSON.stringify(data)); }
+    function num(v){ const n = parseFloat(v); return Number.isFinite(n) ? n : 0; }
+    function money(v){
+      const sign = v >= 0 ? '+' : '-';
+      return sign + '$' + Math.abs(v).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+    }
+    function valClass(v){ return v >= 0 ? 'green' : 'red'; }
+
+    function positionCard(p, i){
+      return `
+        <div class="card">
+          <div class="topline"><div><strong>${i+1}. 포지션</strong></div><button class="danger" type="button" onclick="removePosition(${i})">삭제</button></div>
+          <div class="row4">
+            <div><label>티커</label><input value="${p.symbol}" oninput="updatePosition(${i},'symbol',this.value.toUpperCase())"></div>
+            <div><label>주식수</label><input type="number" step="1" value="${p.shares}" oninput="updatePosition(${i},'shares',this.value)"></div>
+            <div><label>평단</label><input type="number" step="0.01" value="${p.avgCost}" oninput="updatePosition(${i},'avgCost',this.value)"></div>
+            <div><label>현재가</label><input type="number" step="0.01" value="${p.currentPrice}" oninput="updatePosition(${i},'currentPrice',this.value)"></div>
+          </div>
+          <div class="row2" style="margin-top:10px;">
+            <div><label>누적 프리미엄</label><input type="number" step="0.01" value="${p.cumulativePremium}" oninput="updatePosition(${i},'cumulativePremium',this.value)"></div>
+            <div class="small" style="display:flex;align-items:end;">주식손익: <span class="${valClass((p.currentPrice-p.avgCost)*p.shares)}" style="font-weight:700;margin-left:8px;">${money((p.currentPrice-p.avgCost)*p.shares)}</span></div>
+          </div>
+        </div>`;
+    }
+
+    function contractCard(c, i){
+      return `
+        <div class="card">
+          <div class="topline"><div><strong>${i+1}. 계약</strong></div><button class="danger" type="button" onclick="removeContract(${i})">삭제</button></div>
+          <div class="row4">
+            <div><label>티커</label><input value="${c.symbol}" oninput="updateContract(${i},'symbol',this.value.toUpperCase())"></div>
+            <div><label>만기일</label><input value="${c.expiry}" oninput="updateContract(${i},'expiry',this.value)"></div>
+            <div><label>종류</label>
+              <select onchange="updateContract(${i},'type',this.value)">
+                <option ${c.type==='CALL'?'selected':''}>CALL</option>
+                <option ${c.type==='PUT'?'selected':''}>PUT</option>
+              </select>
+            </div>
+            <div><label>행사가</label><input type="number" step="0.01" value="${c.strike}" oninput="updateContract(${i},'strike',this.value)"></div>
+          </div>
+          <div class="row4" style="margin-top:10px;">
+            <div><label>계약수</label><input type="number" step="1" value="${c.contracts}" oninput="updateContract(${i},'contracts',this.value)"></div>
+            <div><label>받은 프리미엄</label><input type="number" step="0.01" value="${c.premiumReceived}" oninput="updateContract(${i},'premiumReceived',this.value)"></div>
+            <div><label>현재 옵션값</label><input type="number" step="0.01" value="${c.currentOptionMark}" oninput="updateContract(${i},'currentOptionMark',this.value)"></div>
+            <div class="small" style="display:flex;align-items:end;">현재 평가: <span class="${valClass(c.premiumReceived-c.currentOptionMark)}" style="font-weight:700;margin-left:8px;">${money(c.premiumReceived-c.currentOptionMark)}</span></div>
+          </div>
+        </div>`;
+    }
+
+    function historyCard(h, i){
+      return `
+        <div class="card">
+          <div class="topline"><div><strong>${i+1}. 누적행</strong></div><button class="danger" type="button" onclick="removeHistory(${i})">삭제</button></div>
+          <div class="row4">
+            <div><label>사이클</label><input value="${h.cycle}" oninput="updateHistory(${i},'cycle',this.value)"></div>
+            <div><label>메모</label><input value="${h.note}" oninput="updateHistory(${i},'note',this.value)"></div>
+            <div><label>프리미엄</label><input type="number" step="0.01" value="${h.premium}" oninput="updateHistory(${i},'premium',this.value)"></div>
+          </div>
+        </div>`;
+    }
+
+    function render(){
+      document.getElementById('positions').innerHTML = data.positions.map(positionCard).join('');
+      document.getElementById('contracts').innerHTML = data.contracts.map(contractCard).join('');
+      document.getElementById('history').innerHTML = data.premiumHistory.map(historyCard).join('');
+
+      const main = data.positions[0] || {symbol:'-',currentPrice:0};
+      const totalPremium = data.positions.reduce((a,p)=>a+num(p.cumulativePremium),0);
+      const totalStockPL = data.positions.reduce((a,p)=>a+((num(p.currentPrice)-num(p.avgCost))*num(p.shares)),0);
+      const totalOptionValue = data.contracts.reduce((a,c)=>a+(num(c.premiumReceived)-num(c.currentOptionMark)),0);
+      const total = totalStockPL + totalOptionValue;
+
+      document.getElementById('kpi-price').textContent = `${main.symbol || '-'} $${num(main.currentPrice).toFixed(2)}`;
+      document.getElementById('kpi-premium').textContent = money(totalPremium);
+      const stockEl = document.getElementById('kpi-stock-pl');
+      stockEl.textContent = money(totalStockPL); stockEl.className = `kpi-value ${valClass(totalStockPL)}`;
+      const totalEl = document.getElementById('kpi-total');
+      totalEl.textContent = money(total); totalEl.className = `kpi-value ${valClass(total)}`;
+
+      document.getElementById('summary-body').innerHTML = data.positions.map(p => {
+        const pl = (num(p.currentPrice)-num(p.avgCost))*num(p.shares);
+        return `<tr>
+          <td>${p.symbol}</td><td>${num(p.shares).toLocaleString()}</td><td>$${num(p.avgCost).toFixed(2)}</td><td>$${num(p.currentPrice).toFixed(2)}</td>
+          <td class="${valClass(pl)}">${money(pl)}</td><td class="green">${money(num(p.cumulativePremium))}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function updatePosition(i,k,v){
+      data.positions[i][k] = ['symbol'].includes(k) ? v : num(v);
+      save(); render();
+    }
+    function updateContract(i,k,v){
+      data.contracts[i][k] = ['symbol','expiry','type'].includes(k) ? v : num(v);
+      save(); render();
+    }
+    function updateHistory(i,k,v){
+      data.premiumHistory[i][k] = k === 'premium' ? num(v) : v;
+      save(); render();
+    }
+    function removePosition(i){ data.positions.splice(i,1); save(); render(); }
+    function removeContract(i){ data.contracts.splice(i,1); save(); render(); }
+    function removeHistory(i){ data.premiumHistory.splice(i,1); save(); render(); }
+    function addPosition(){ data.positions.push({symbol:'NEW', shares:100, avgCost:0, currentPrice:0, cumulativePremium:0}); save(); render(); }
+    function addContract(){ data.contracts.push({symbol:data.positions[0]?.symbol||'NEW', expiry:'', type:'CALL', strike:0, contracts:1, premiumReceived:0, currentOptionMark:0}); save(); render(); }
+    function addHistory(){ data.premiumHistory.push({cycle:`${data.premiumHistory.length+1}차`, note:'', premium:0}); save(); render(); }
+    function resetAll(){ data = clone(defaultData); save(); render(); }
+
+    window.updatePosition = updatePosition;
+    window.updateContract = updateContract;
+    window.updateHistory = updateHistory;
+    window.removePosition = removePosition;
+    window.removeContract = removeContract;
+    window.removeHistory = removeHistory;
+
+    document.getElementById('save-btn').addEventListener('click', () => { save(); alert('저장되었습니다.'); });
+    document.getElementById('add-position-btn').addEventListener('click', addPosition);
+    document.getElementById('add-contract-btn').addEventListener('click', addContract);
+    document.getElementById('add-history-btn').addEventListener('click', addHistory);
+    document.getElementById('reset-btn').addEventListener('click', resetAll);
+
+    render();
+  </script>
+</body>
+</html>
