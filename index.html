@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>옵션 사이클 대시보드 템플릿</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #141b34;
+      --panel-2: #1b2445;
+      --text: #eef2ff;
+      --muted: #b9c3e6;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --line: #2f3b69;
+      --accent: #60a5fa;
+      --warn: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background: linear-gradient(180deg, var(--bg), #12172b 60%, #0b1020);
+      color: var(--text);
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 16px; }
+    .title { font-size: 28px; font-weight: 800; margin: 4px 0 8px; }
+    .subtitle { color: var(--muted); margin-bottom: 16px; }
+    .grid { display: grid; gap: 12px; }
+    .top-grid { grid-template-columns: repeat(4, 1fr); }
+    .two-grid { grid-template-columns: 1.3fr 1fr; }
+    .panel {
+      background: rgba(20, 27, 52, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+    }
+    .panel h2 { margin: 0 0 10px; font-size: 18px; }
+    .kpi-label { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    .kpi-value { font-size: 26px; font-weight: 800; }
+    .good { color: var(--good); }
+    .bad { color: var(--bad); }
+    .muted { color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    th:first-child, td:first-child,
+    th:nth-child(2), td:nth-child(2) { text-align: left; }
+    tr:last-child td { border-bottom: 0; }
+    .pill {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+    input, select, button {
+      background: #0f1730;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    button { cursor: pointer; }
+    button.primary { background: #1d4ed8; border-color: #2563eb; }
+    .legend { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .small { font-size: 12px; }
+    .note { color: var(--muted); line-height: 1.5; }
+    .footer { color: var(--muted); font-size: 12px; margin-top: 16px; }
+    @media (max-width: 920px) {
+      .top-grid, .two-grid { grid-template-columns: 1fr; }
+      .title { font-size: 22px; }
+      .kpi-value { font-size: 22px; }
+      th, td { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="title">옵션 사이클 대시보드</div>
+    <div class="subtitle">프리미엄 선입금 · 현재 평가손익 · 만기 시나리오 · 누적 프리미엄을 한 화면에서 보는 템플릿</div>
+
+    <div class="grid top-grid">
+      <div class="panel">
+        <div class="kpi-label">현재가</div>
+        <div id="kpi-current-price" class="kpi-value">-</div>
+      </div>
+      <div class="panel">
+        <div class="kpi-label">총 누적 프리미엄</div>
+        <div id="kpi-cum-premium" class="kpi-value good">-</div>
+      </div>
+      <div class="panel">
+        <div class="kpi-label">현재 주식 평가손익</div>
+        <div id="kpi-stock-pnl" class="kpi-value">-</div>
+      </div>
+      <div class="panel">
+        <div class="kpi-label">현재 총 평가값</div>
+        <div id="kpi-total-mark" class="kpi-value">-</div>
+      </div>
+    </div>
+
+    <div class="grid two-grid" style="margin-top: 12px;">
+      <div class="panel">
+        <h2>1) 포지션 요약</h2>
+        <div class="controls small">
+          <span class="pill">자동 가격 새로고침</span>
+          <span class="muted">개발자는 아래 <code>fetchLiveQuote()</code> 를 서버 API에 연결</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>티커</th>
+              <th>주식수</th>
+              <th>평단</th>
+              <th>현재가</th>
+              <th>주식손익</th>
+              <th>누적 프리미엄</th>
+            </tr>
+          </thead>
+          <tbody id="positions-body"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>2) 현재 사이클 상태</h2>
+        <table>
+          <tbody>
+            <tr><td>현재 기준일</td><td id="today-cell"></td></tr>
+            <tr><td>가장 가까운 만기</td><td id="nearest-expiry"></td></tr>
+            <tr><td>이번 사이클 선입금 프리미엄</td><td id="cycle-premium"></td></tr>
+            <tr><td>현재 옵션 평가값</td><td id="cycle-option-mark"></td></tr>
+            <tr><td>이번 사이클 현재 손익</td><td id="cycle-running-pnl"></td></tr>
+          </tbody>
+        </table>
+        <div class="legend small">
+          <span class="pill">1차: 프리미엄 선입금</span>
+          <span class="pill">2차: 만기 전 평가변동</span>
+          <span class="pill">최종: 만기 손익 확정</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top: 12px;">
+      <h2>3) 옵션 계약 목록</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>티커</th>
+            <th>만기</th>
+            <th>종류</th>
+            <th>행사가</th>
+            <th>계약수</th>
+            <th>받은 프리미엄</th>
+            <th>현재 옵션값</th>
+            <th>상태</th>
+          </tr>
+        </thead>
+        <tbody id="contracts-body"></tbody>
+      </table>
+    </div>
+
+    <div class="grid two-grid" style="margin-top: 12px;">
+      <div class="panel">
+        <h2>4) 만기 시나리오</h2>
+        <div class="controls">
+          <label>티커
+            <select id="scenario-symbol"></select>
+          </label>
+          <label>기준 만기
+            <select id="scenario-expiry"></select>
+          </label>
+          <button class="primary" id="recalc-btn">시나리오 다시 계산</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>만기주가</th>
+              <th>주식상태</th>
+              <th>주식손익</th>
+              <th>옵션손익</th>
+              <th>총합</th>
+            </tr>
+          </thead>
+          <tbody id="scenario-body"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>5) 누적 수익 트래커</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>사이클</th>
+              <th>설명</th>
+              <th>프리미엄</th>
+              <th>누적</th>
+            </tr>
+          </thead>
+          <tbody id="history-body"></tbody>
+        </table>
+        <p class="note small" style="margin-top: 10px;">
+          이 표는 “한 번 벌었다”가 아니라 “계속 선입금이 누적되고, 최종적으로 만기에서 정산된다”는 구조를 보여주기 위한 영역입니다.
+        </p>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top: 12px;">
+      <h2>개발자 메모</h2>
+      <div class="note small">
+        1) 브라우저에서 직접 Yahoo Finance 비공식 엔드포인트를 치는 방식은 CORS/쿠키 문제로 불안정할 수 있으니 서버 프록시를 두는 편이 안전합니다.<br/>
+        2) 서버는 티커별 실시간 가격만 내려주고, 프리미엄/평단/계약 정보는 이 페이지의 JSON 또는 DB에서 합산하면 됩니다.<br/>
+        3) 새로고침 주기는 30~60초 정도면 충분합니다. 시장 종료 후에는 애프터마켓 값을 별도 필드로 보여줄 수 있습니다.
+      </div>
+    </div>
+
+    <div class="footer">
+      템플릿 파일: 옵션 구조를 설명하기 위한 예시입니다. 실제 손익 계산은 세금/수수료/배당/롤오버 비용 등을 별도 반영하세요.
+    </div>
+  </div>
+
+  <script>
+    // ===== 1) 사용자 데이터 입력 영역 =====
+    const dashboardData = {
+      positions: [
+        {
+          symbol: 'SOFI',
+          shares: 15000,
+          avgCost: 17.20,
+          currentPrice: 16.50,
+          cumulativePremium: 18500
+        },
+        {
+          symbol: 'UNH',
+          shares: 2000,
+          avgCost: 270.00,
+          currentPrice: 277.00,
+          cumulativePremium: 44369
+        }
+      ],
+      optionContracts: [
+        {
+          symbol: 'SOFI',
+          expiry: '2026-04-10',
+          type: 'CALL',
+          strike: 16.00,
+          contracts: 150,
+          premiumReceived: 7500,
+          currentOptionMark: -9600
+        },
+        {
+          symbol: 'SOFI',
+          expiry: '2026-04-17',
+          type: 'CALL',
+          strike: 17.50,
+          contracts: 50,
+          premiumReceived: 2000,
+          currentOptionMark: -1200
+        },
+        {
+          symbol: 'UNH',
+          expiry: '2026-05-01',
+          type: 'CALL',
+          strike: 265.00,
+          contracts: 20,
+          premiumReceived: 12000,
+          currentOptionMark: -8600
+        }
+      ],
+      premiumHistory: [
+        { cycle: '1차', note: 'SOFI 3월 옵션', premium: 9500 },
+        { cycle: '2차', note: 'SOFI 4월 옵션', premium: 9000 },
+        { cycle: '3차', note: 'UNH 5월 옵션', premium: 12000 }
+      ]
+    };
+
+    // ===== 2) 개발자가 연결할 실시간 가격 함수 =====
+    // 권장: 브라우저 -> 내 서버(/api/quote?symbols=SOFI,UNH) -> 외부 데이터 제공사
+    // 외부 API 키를 브라우저에 직접 노출하지 않는 것이 좋습니다.
+    async function fetchLiveQuote(symbols) {
+      // 예시 형태만 제공
+      // const res = await fetch(`/api/quote?symbols=${symbols.join(',')}`);
+      // const data = await res.json();
+      // return { SOFI: 16.82, UNH: 279.30 };
+      return null; // 현재는 수동 입력값 사용
+    }
+
+    function fmtMoney(v) {
+      const sign = v > 0 ? '+' : '';
+      return sign + '$' + Number(v).toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+    }
+
+    function fmtPrice(v) {
+      return '$' + Number(v).toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+    }
+
+    function cls(v) {
+      return v > 0 ? 'good' : v < 0 ? 'bad' : '';
+    }
+
+    function stockPnl(position) {
+      return (position.currentPrice - position.avgCost) * position.shares;
+    }
+
+    function totalOptionMark(symbol) {
+      return dashboardData.optionContracts
+        .filter(c => c.symbol === symbol)
+        .reduce((sum, c) => sum + c.currentOptionMark, 0);
+    }
+
+    function premiumThisCycle(expiry) {
+      return dashboardData.optionContracts
+        .filter(c => c.expiry === expiry)
+        .reduce((sum, c) => sum + c.premiumReceived, 0);
+    }
+
+    function optionMarkThisCycle(expiry) {
+      return dashboardData.optionContracts
+        .filter(c => c.expiry === expiry)
+        .reduce((sum, c) => sum + c.currentOptionMark, 0);
+    }
+
+    function nearestExpiry() {
+      return [...new Set(dashboardData.optionContracts.map(c => c.expiry))].sort()[0] || '-';
+    }
+
+    function renderKPIs() {
+      const firstPos = dashboardData.positions[0];
+      const cumPremium = dashboardData.positions.reduce((s, p) => s + p.cumulativePremium, 0);
+      const stockTotal = dashboardData.positions.reduce((s, p) => s + stockPnl(p), 0);
+      const optionMark = dashboardData.optionContracts.reduce((s, c) => s + c.currentOptionMark, 0);
+      const totalMark = cumPremium + stockTotal + optionMark;
+
+      document.getElementById('kpi-current-price').textContent = `${firstPos.symbol} ${fmtPrice(firstPos.currentPrice)}`;
+      document.getElementById('kpi-cum-premium').textContent = fmtMoney(cumPremium);
+      document.getElementById('kpi-stock-pnl').textContent = fmtMoney(stockTotal);
+      document.getElementById('kpi-stock-pnl').className = `kpi-value ${cls(stockTotal)}`;
+      document.getElementById('kpi-total-mark').textContent = fmtMoney(totalMark);
+      document.getElementById('kpi-total-mark').className = `kpi-value ${cls(totalMark)}`;
+
+      const exp = nearestExpiry();
+      const running = premiumThisCycle(exp) + optionMarkThisCycle(exp);
+      document.getElementById('today-cell').textContent = new Date().toLocaleString('ko-KR');
+      document.getElementById('nearest-expiry').textContent = exp;
+      document.getElementById('cycle-premium').textContent = fmtMoney(premiumThisCycle(exp));
+      document.getElementById('cycle-option-mark').textContent = fmtMoney(optionMarkThisCycle(exp));
+      const cell = document.getElementById('cycle-running-pnl');
+      cell.textContent = fmtMoney(running);
+      cell.className = cls(running);
+    }
+
+    function renderPositions() {
+      const body = document.getElementById('positions-body');
+      body.innerHTML = dashboardData.positions.map(p => {
+        const pnl = stockPnl(p);
+        return `
+          <tr>
+            <td>${p.symbol}</td>
+            <td>${p.shares.toLocaleString()}</td>
+            <td>${fmtPrice(p.avgCost)}</td>
+            <td>${fmtPrice(p.currentPrice)}</td>
+            <td class="${cls(pnl)}">${fmtMoney(pnl)}</td>
+            <td class="good">${fmtMoney(p.cumulativePremium)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderContracts() {
+      const body = document.getElementById('contracts-body');
+      body.innerHTML = dashboardData.optionContracts.map(c => {
+        const intrinsicNow = (() => {
+          const pos = dashboardData.positions.find(p => p.symbol === c.symbol);
+          if (!pos) return 0;
+          if (c.type === 'CALL') return Math.max(pos.currentPrice - c.strike, 0) * c.contracts * 100;
+          return Math.max(c.strike - pos.currentPrice, 0) * c.contracts * 100;
+        })();
+        const status = intrinsicNow > 0 ? '행사가 근처/ITM' : '시간가치 중심/OTM';
+        return `
+          <tr>
+            <td>${c.symbol}</td>
+            <td>${c.expiry}</td>
+            <td>${c.type}</td>
+            <td>${fmtPrice(c.strike)}</td>
+            <td>${c.contracts}</td>
+            <td class="good">${fmtMoney(c.premiumReceived)}</td>
+            <td class="${cls(c.currentOptionMark)}">${fmtMoney(c.currentOptionMark)}</td>
+            <td>${status}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function setupScenarioSelectors() {
+      const symbolSel = document.getElementById('scenario-symbol');
+      const expirySel = document.getElementById('scenario-expiry');
+      const symbols = [...new Set(dashboardData.optionContracts.map(c => c.symbol))];
+      symbolSel.innerHTML = symbols.map(s => `<option value="${s}">${s}</option>`).join('');
+
+      function refillExpiry() {
+        const symbol = symbolSel.value;
+        const expiries = [...new Set(dashboardData.optionContracts.filter(c => c.symbol === symbol).map(c => c.expiry))].sort();
+        expirySel.innerHTML = expiries.map(e => `<option value="${e}">${e}</option>`).join('');
+      }
+      symbolSel.addEventListener('change', () => { refillExpiry(); renderScenario(); });
+      expirySel.addEventListener('change', renderScenario);
+      refillExpiry();
+    }
+
+    function renderScenario() {
+      const symbol = document.getElementById('scenario-symbol').value;
+      const expiry = document.getElementById('scenario-expiry').value;
+      const pos = dashboardData.positions.find(p => p.symbol === symbol);
+      const contracts = dashboardData.optionContracts.filter(c => c.symbol === symbol && c.expiry === expiry);
+      const body = document.getElementById('scenario-body');
+      if (!pos || contracts.length === 0) {
+        body.innerHTML = '<tr><td colspan="5">데이터 없음</td></tr>';
+        return;
+      }
+
+      const strikes = contracts.map(c => c.strike);
+      const minP = Math.max(0, Math.min(...strikes) - 2);
+      const maxP = Math.max(...strikes) + 2;
+      const prices = [];
+      for (let p = minP; p <= maxP + 0.001; p += 0.5) prices.push(Number(p.toFixed(2)));
+
+      body.innerHTML = prices.map(price => {
+        let sharesLeft = pos.shares;
+        let stockExitCash = 0;
+        let optionPnl = 0;
+        let assigned = false;
+
+        contracts.forEach(c => {
+          const coveredShares = c.contracts * 100;
+          if (c.type === 'CALL') {
+            if (price >= c.strike) {
+              assigned = true;
+              sharesLeft -= coveredShares;
+              stockExitCash += c.strike * coveredShares;
+            }
+            const payoff = -Math.max(price - c.strike, 0) * coveredShares;
+            optionPnl += c.premiumReceived + payoff;
+          } else if (c.type === 'PUT') {
+            const payoff = -Math.max(c.strike - price, 0) * coveredShares;
+            optionPnl += c.premiumReceived + payoff;
+          }
+        });
+
+        const uncalledShares = Math.max(sharesLeft, 0);
+        const stockValueUncalled = uncalledShares * price;
+        const originalCost = pos.avgCost * pos.shares;
+        const currentEndValue = stockExitCash + stockValueUncalled;
+        const stockPnL = currentEndValue - originalCost;
+        const total = stockPnL + optionPnl;
+        const state = assigned ? '일부/전부 호출' : '주식 유지';
+
+        return `
+          <tr>
+            <td>${fmtPrice(price)}</td>
+            <td>${state}</td>
+            <td class="${cls(stockPnL)}">${fmtMoney(stockPnL)}</td>
+            <td class="${cls(optionPnl)}">${fmtMoney(optionPnl)}</td>
+            <td class="${cls(total)}">${fmtMoney(total)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderHistory() {
+      const body = document.getElementById('history-body');
+      let cum = 0;
+      body.innerHTML = dashboardData.premiumHistory.map(row => {
+        cum += row.premium;
+        return `
+          <tr>
+            <td>${row.cycle}</td>
+            <td>${row.note}</td>
+            <td class="good">${fmtMoney(row.premium)}</td>
+            <td class="good">${fmtMoney(cum)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function refreshLivePrices() {
+      const symbols = dashboardData.positions.map(p => p.symbol);
+      const live = await fetchLiveQuote(symbols);
+      if (live) {
+        dashboardData.positions.forEach(p => {
+          if (typeof live[p.symbol] === 'number') p.currentPrice = live[p.symbol];
+        });
+      }
+      renderAll();
+    }
+
+    function renderAll() {
+      renderKPIs();
+      renderPositions();
+      renderContracts();
+      renderScenario();
+      renderHistory();
+    }
+
+    document.getElementById('recalc-btn').addEventListener('click', renderScenario);
+    setupScenarioSelectors();
+    renderAll();
+    refreshLivePrices();
+    setInterval(refreshLivePrices, 60000);
+  </script>
+</body>
+</html>
