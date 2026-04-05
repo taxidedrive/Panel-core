@@ -1,0 +1,2 @@
+# Panel-core
+Core panel
