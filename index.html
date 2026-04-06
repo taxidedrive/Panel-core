@@ -3,78 +3,180 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>옵션 사이클 대시보드 v3.1</title>
+  <title>옵션 사이클 대시보드 v3.2</title>
   <style>
-    :root{
-      --bg:#06122f;
-      --panel:#0d1b47;
-      --line:#29408f;
-      --text:#eef3ff;
-      --muted:#b8c4ee;
-      --green:#34d26a;
-      --red:#ff6b6b;
-      --btn:#274ecf;
-      --btn2:#1a2e78;
-      --input:#0a163b;
+    :root {
+      --bg1: #04143f;
+      --bg2: #071b52;
+      --card: rgba(11, 31, 92, 0.95);
+      --line: rgba(96, 132, 255, 0.32);
+      --text: #eef3ff;
+      --muted: #b8c6ff;
+      --green: #41df72;
+      --red: #ff6b7d;
+      --blue: #3e72ff;
+      --chip: rgba(58, 88, 185, 0.45);
+      --input: rgba(5, 20, 65, 0.88);
     }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:radial-gradient(circle at top,#08205d 0%,var(--bg) 45%,#030a1a 100%);color:var(--text)}
-    .wrap{max-width:880px;margin:0 auto;padding:20px}
-    h1{font-size:44px;line-height:1.1;margin:12px 0 10px;font-weight:800}
-    .sub{font-size:18px;color:var(--muted);margin-bottom:18px}
-    .card{background:rgba(13,27,71,.96);border:1px solid var(--line);border-radius:28px;padding:22px;margin-bottom:18px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
-    .section-title{font-size:26px;font-weight:800;margin:0 0 16px}
-    .actions{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px}
-    button{border:none;border-radius:22px;padding:16px 20px;font-size:18px;color:#fff;background:var(--btn);cursor:pointer}
-    button.secondary{background:transparent;border:1px solid var(--line);color:var(--text)}
-    button.small{padding:10px 14px;font-size:15px;border-radius:16px;background:var(--btn2)}
-    .hint{color:var(--muted);font-size:17px;line-height:1.5}
-    .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-    .kpi .label{font-size:18px;color:var(--muted);margin-bottom:14px}
-    .kpi .value{font-size:34px;font-weight:800}
-    .green{color:var(--green)}
-    .red{color:var(--red)}
-    .group{background:rgba(9,18,48,.9);border:1px solid var(--line);border-radius:22px;padding:16px;margin:14px 0}
-    .group-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
-    .group-title{font-size:24px;font-weight:800}
-    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    .field label{display:block;font-size:15px;color:var(--muted);margin:0 0 8px}
-    .field input,.field select{width:100%;background:var(--input);color:var(--text);border:1px solid var(--line);border-radius:16px;padding:14px 14px;font-size:20px}
-    .table{width:100%;border-collapse:collapse;margin-top:12px}
-    .table th,.table td{padding:12px 8px;border-bottom:1px solid rgba(112,139,230,.25);text-align:left;font-size:18px}
-    .table th{color:var(--muted);font-size:16px}
-    @media (max-width:700px){
-      .wrap{padding:14px}
-      h1{font-size:34px}
-      .kpis,.grid{grid-template-columns:1fr}
-      .table th,.table td{font-size:15px;padding:10px 6px}
-      button{font-size:16px;padding:14px 16px}
-      .group-title{font-size:20px}
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(26,72,214,0.18), transparent 32%),
+        radial-gradient(circle at 80% 60%, rgba(0,122,255,0.10), transparent 30%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 18px 14px 40px; }
+    .title { font-size: 26px; font-weight: 800; margin: 6px 0 8px; }
+    .sub { color: var(--muted); font-size: 14px; line-height: 1.45; margin-bottom: 16px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      padding: 18px;
+      box-shadow: 0 0 0 1px rgba(7, 17, 52, 0.15) inset, 0 10px 30px rgba(0,0,0,0.12);
+      margin-bottom: 16px;
+    }
+    .card h2, .card h3 { margin: 0 0 14px; font-size: 18px; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .kpi {
+      background: rgba(15, 31, 89, 0.9);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 16px;
+    }
+    .kpi-label { color: var(--muted); font-size: 14px; margin-bottom: 10px; }
+    .kpi-value { font-size: 31px; font-weight: 800; line-height: 1.1; }
+    .green { color: var(--green); }
+    .red { color: var(--red); }
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    button {
+      border: 1px solid var(--line);
+      background: var(--chip);
+      color: var(--text);
+      border-radius: 20px;
+      padding: 12px 16px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    button.primary { background: var(--blue); }
+    .small { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .section-title { font-size: 18px; font-weight: 800; margin: 0 0 14px; }
+    .entry {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 14px;
+      background: rgba(7, 22, 72, 0.85);
+      margin-bottom: 12px;
+    }
+    .entry-head {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      margin-bottom: 10px;
+    }
+    .entry-title { font-size: 16px; font-weight: 800; }
+    .delete-btn { padding: 10px 14px; border-radius: 16px; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .field label {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .field input, .field select {
+      width: 100%;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--input);
+      color: var(--text);
+      padding: 14px 16px;
+      font-size: 18px;
+      outline: none;
+    }
+    .field .type-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .type-option {
+      text-align: center;
+      padding: 13px 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--input);
+      cursor: pointer;
+      user-select: none;
+    }
+    .type-option.active { background: var(--blue); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 720px; border-collapse: collapse; }
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid rgba(140,160,255,0.18);
+      white-space: nowrap;
+      text-align: right;
+      font-size: 14px;
+    }
+    th { color: var(--muted); font-weight: 700; }
+    th:first-child, td:first-child { text-align: left; }
+    tr:last-child td { border-bottom: 0; }
+    @media (min-width: 760px) {
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .grid.cols-2 { grid-template-columns: 1fr 1fr; }
+      .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>옵션 사이클 대시보드 v3.1</h1>
-    <div class="sub">고정본 · 수동 입력 · 추가/삭제 버튼 다시 연결 · 저장 가능</div>
+    <div class="title">옵션 사이클 대시보드 v3.2</div>
+    <div class="sub">확정 수익 / 진행중 프리미엄을 나눠서 보는 버전입니다. 옵션 종류는 커버드콜(CC) / 셀풋(PUT) 두 가지만 사용합니다.</div>
 
     <div class="card">
-      <div class="section-title">빠른 작업</div>
-      <div class="actions">
-        <button onclick="saveData()">현재 입력값 저장</button>
-        <button onclick="addPosition()">포지션 추가</button>
-        <button onclick="addContract()">계약 추가</button>
-        <button onclick="addIncomeRow()">누적행 추가</button>
-        <button class="secondary" onclick="resetSample()">샘플값 복원</button>
+      <div class="controls">
+        <button class="primary" id="saveBtn">현재 입력값 저장</button>
+        <button id="resetBtn">샘플값 복원</button>
+        <button id="addPositionBtn">포지션 추가</button>
+        <button id="addOptionBtn">계약 추가</button>
       </div>
-      <div class="hint">현재가, 평단, 주식수, 누적 프리미엄, 계약, 누적행을 직접 바꾸면 아래 숫자가 즉시 다시 계산됩니다.</div>
+      <div class="small">프리미엄은 지금처럼 총액으로 넣으면 됩니다. 확정 여부는 옵션 상태에서 <b>closed</b> 또는 <b>open</b>으로 나뉩니다.</div>
     </div>
 
-    <div class="kpis">
-      <div class="card kpi"><div class="label">대표 현재가</div><div id="heroPrice" class="value">-</div></div>
-      <div class="card kpi"><div class="label">총 누적 프리미엄</div><div id="totalPremium" class="value green">-</div></div>
-      <div class="card kpi"><div class="label">현재 주식 평가손익</div><div id="stockPnL" class="value">-</div></div>
-      <div class="card kpi"><div class="label">현재 총 평가값</div><div id="totalValue" class="value">-</div></div>
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">대표 현재가</div>
+        <div class="kpi-value" id="headlinePrice">SOFI $16.50</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">확정 수익 (Realized)</div>
+        <div class="kpi-value green" id="realizedPremium">+$0.00</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">진행중 프리미엄 (Open)</div>
+        <div class="kpi-value green" id="openPremium">+$0.00</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">총 누적 프리미엄</div>
+        <div class="kpi-value green" id="totalPremium">+$0.00</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">현재 주식 평가손익</div>
+        <div class="kpi-value" id="stockPnl">$0.00</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">현재 총 평가값</div>
+        <div class="kpi-value" id="totalValue">$0.00</div>
+      </div>
     </div>
 
     <div class="card">
@@ -84,215 +186,219 @@
 
     <div class="card">
       <div class="section-title">옵션 계약 입력</div>
-      <div id="contracts"></div>
-    </div>
-
-    <div class="card">
-      <div class="section-title">누적 수익 입력</div>
-      <div id="incomes"></div>
+      <div id="options"></div>
     </div>
 
     <div class="card">
       <div class="section-title">요약 표</div>
-      <table class="table" id="summaryTable">
-        <thead><tr><th>티커</th><th>주식수</th><th>평단</th><th>현재가</th><th>주식손익</th><th>누적 프리미엄</th></tr></thead>
-        <tbody></tbody>
-      </table>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>티커</th>
+              <th>주식수</th>
+              <th>평단</th>
+              <th>현재가</th>
+              <th>주식손익</th>
+              <th>누적 프리미엄</th>
+            </tr>
+          </thead>
+          <tbody id="summaryBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-<script>
-const SAMPLE = {
-  positions:[
-    {ticker:'SOFI', shares:15000, avgCost:17.20, currentPrice:16.50, premium:18500},
-    {ticker:'UNH', shares:2000, avgCost:270.00, currentPrice:277.00, premium:44369}
-  ],
-  contracts:[
-    {ticker:'SOFI', type:'CC', expiry:'2026-04-10', strike:16, contracts:150, premium:7500},
-    {ticker:'UNH', type:'CC', expiry:'2026-05-01', strike:265, contracts:20, premium:44369}
-  ],
-  incomes:[
-    {label:'1차', amount:9500},
-    {label:'2차', amount:8000},
-    {label:'3차', amount:10000}
-  ]
-};
-let state = loadData();
-
-function loadData(){
-  try{
-    const raw = localStorage.getItem('options_dashboard_v31');
-    return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(SAMPLE));
-  }catch(e){
-    return JSON.parse(JSON.stringify(SAMPLE));
-  }
-}
-function saveData(){
-  syncStateFromInputs();
-  localStorage.setItem('options_dashboard_v31', JSON.stringify(state));
-  alert('저장되었습니다.');
-}
-function resetSample(){
-  state = JSON.parse(JSON.stringify(SAMPLE));
-  localStorage.removeItem('options_dashboard_v31');
-  renderAll();
-}
-function money(n){
-  const sign = n >= 0 ? '+' : '-';
-  return `${sign}$${Math.abs(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-}
-function num(v){ return Number(v)||0; }
-
-function renderAll(){
-  renderPositions();
-  renderContracts();
-  renderIncomes();
-  recalc();
-}
-
-function renderPositions(){
-  const box = document.getElementById('positions');
-  box.innerHTML = '';
-  state.positions.forEach((p, i) => {
-    const div = document.createElement('div');
-    div.className = 'group';
-    div.innerHTML = `
-      <div class="group-head">
-        <div class="group-title">${i+1}. 포지션</div>
-        <button class="small" onclick="removePosition(${i})">삭제</button>
+  <template id="positionTpl">
+    <div class="entry position-entry">
+      <div class="entry-head">
+        <div class="entry-title"></div>
+        <button class="delete-btn">삭제</button>
       </div>
-      <div class="grid">
-        <div class="field"><label>티커</label><input data-kind="position" data-index="${i}" data-key="ticker" value="${p.ticker}"></div>
-        <div class="field"><label>주식수</label><input type="number" step="1" data-kind="position" data-index="${i}" data-key="shares" value="${p.shares}"></div>
-        <div class="field"><label>평단</label><input type="number" step="0.01" data-kind="position" data-index="${i}" data-key="avgCost" value="${p.avgCost}"></div>
-        <div class="field"><label>현재가</label><input type="number" step="0.01" data-kind="position" data-index="${i}" data-key="currentPrice" value="${p.currentPrice}"></div>
-        <div class="field"><label>누적 프리미엄</label><input type="number" step="0.01" data-kind="position" data-index="${i}" data-key="premium" value="${p.premium}"></div>
-      </div>`;
-    box.appendChild(div);
-  });
-  bindInputs();
-}
-
-function renderContracts(){
-  const box = document.getElementById('contracts');
-  box.innerHTML = '';
-  state.contracts.forEach((c, i) => {
-    const div = document.createElement('div');
-    div.className = 'group';
-    div.innerHTML = `
-      <div class="group-head">
-        <div class="group-title">${i+1}. 계약</div>
-        <button class="small" onclick="removeContract(${i})">삭제</button>
+      <div class="grid cols-2">
+        <div class="field"><label>티커</label><input data-key="ticker" /></div>
+        <div class="field"><label>주식수</label><input data-key="shares" type="number" step="1" /></div>
+        <div class="field"><label>평단</label><input data-key="avg" type="number" step="0.01" /></div>
+        <div class="field"><label>현재가</label><input data-key="price" type="number" step="0.01" /></div>
+        <div class="field"><label>누적 프리미엄</label><input data-key="premium" type="number" step="0.01" /></div>
       </div>
-      <div class="grid">
-        <div class="field"><label>티커</label><input data-kind="contract" data-index="${i}" data-key="ticker" value="${c.ticker}"></div>
-        <div class="field"><label>종류</label>
-          <select data-kind="contract" data-index="${i}" data-key="type">
-            <option ${c.type==='CC'?'selected':''}>CC</option>
-            <option ${c.type==='PUT'?'selected':''}>PUT</option>
-            <option ${c.type==='CALL'?'selected':''}>CALL</option>
+    </div>
+  </template>
+
+  <template id="optionTpl">
+    <div class="entry option-entry">
+      <div class="entry-head">
+        <div class="entry-title"></div>
+        <button class="delete-btn">삭제</button>
+      </div>
+      <div class="grid cols-2">
+        <div class="field"><label>티커</label><input data-key="ticker" /></div>
+        <div class="field">
+          <label>종류</label>
+          <div class="type-toggle">
+            <div class="type-option" data-value="CC">커버드콜</div>
+            <div class="type-option" data-value="PUT">셀풋</div>
+          </div>
+          <input data-key="type" type="hidden" />
+        </div>
+        <div class="field"><label>만기</label><input data-key="expiry" type="date" /></div>
+        <div class="field"><label>행사가</label><input data-key="strike" type="number" step="0.01" /></div>
+        <div class="field"><label>계약수</label><input data-key="contracts" type="number" step="1" /></div>
+        <div class="field"><label>프리미엄 총액</label><input data-key="premium" type="number" step="0.01" /></div>
+        <div class="field">
+          <label>상태</label>
+          <select data-key="status">
+            <option value="open">open</option>
+            <option value="closed">closed</option>
           </select>
         </div>
-        <div class="field"><label>만기</label><input data-kind="contract" data-index="${i}" data-key="expiry" value="${c.expiry}"></div>
-        <div class="field"><label>행사가</label><input type="number" step="0.01" data-kind="contract" data-index="${i}" data-key="strike" value="${c.strike}"></div>
-        <div class="field"><label>계약수</label><input type="number" step="1" data-kind="contract" data-index="${i}" data-key="contracts" value="${c.contracts}"></div>
-        <div class="field"><label>프리미엄</label><input type="number" step="0.01" data-kind="contract" data-index="${i}" data-key="premium" value="${c.premium}"></div>
-      </div>`;
-    box.appendChild(div);
-  });
-  bindInputs();
-}
-
-function renderIncomes(){
-  const box = document.getElementById('incomes');
-  box.innerHTML = '';
-  state.incomes.forEach((r, i) => {
-    const div = document.createElement('div');
-    div.className = 'group';
-    div.innerHTML = `
-      <div class="group-head">
-        <div class="group-title">${i+1}. 누적행</div>
-        <button class="small" onclick="removeIncomeRow(${i})">삭제</button>
       </div>
-      <div class="grid">
-        <div class="field"><label>이름</label><input data-kind="income" data-index="${i}" data-key="label" value="${r.label}"></div>
-        <div class="field"><label>금액</label><input type="number" step="0.01" data-kind="income" data-index="${i}" data-key="amount" value="${r.amount}"></div>
-      </div>`;
-    box.appendChild(div);
-  });
-  bindInputs();
-}
+    </div>
+  </template>
 
-function bindInputs(){
-  document.querySelectorAll('input[data-kind],select[data-kind]').forEach(el => {
-    el.oninput = () => { syncStateFromInputs(); recalc(); };
-    el.onchange = () => { syncStateFromInputs(); recalc(); };
-  });
-}
+  <script>
+    const sampleData = {
+      positions: [
+        { ticker: 'SOFI', shares: 15000, avg: 17.2, price: 16.5, premium: 18500 },
+        { ticker: 'UNH', shares: 2000, avg: 270, price: 277, premium: 44369 }
+      ],
+      options: [
+        { ticker: 'SOFI', type: 'CC', expiry: '2026-04-10', strike: 16, contracts: 150, premium: 18500, status: 'open' },
+        { ticker: 'UNH', type: 'CC', expiry: '2026-05-01', strike: 265, contracts: 20, premium: 44369, status: 'open' },
+        { ticker: 'SOFI', type: 'PUT', expiry: '2026-04-10', strike: 15.5, contracts: 20, premium: 599, status: 'open' }
+      ]
+    };
 
-function syncStateFromInputs(){
-  document.querySelectorAll('[data-kind="position"]').forEach(el => {
-    const i = +el.dataset.index; const key = el.dataset.key;
-    state.positions[i][key] = ['ticker'].includes(key) ? el.value : num(el.value);
-  });
-  document.querySelectorAll('[data-kind="contract"]').forEach(el => {
-    const i = +el.dataset.index; const key = el.dataset.key;
-    state.contracts[i][key] = ['ticker','type','expiry'].includes(key) ? el.value : num(el.value);
-  });
-  document.querySelectorAll('[data-kind="income"]').forEach(el => {
-    const i = +el.dataset.index; const key = el.dataset.key;
-    state.incomes[i][key] = key === 'label' ? el.value : num(el.value);
-  });
-}
+    let data = loadSaved() || JSON.parse(JSON.stringify(sampleData));
 
-function addPosition(){
-  state.positions.push({ticker:'NEW', shares:0, avgCost:0, currentPrice:0, premium:0});
-  renderAll();
-}
-function removePosition(i){ state.positions.splice(i,1); renderAll(); }
-function addContract(){
-  state.contracts.push({ticker:'NEW', type:'CC', expiry:'2026-04-10', strike:0, contracts:0, premium:0});
-  renderAll();
-}
-function removeContract(i){ state.contracts.splice(i,1); renderAll(); }
-function addIncomeRow(){
-  state.incomes.push({label:'새 행', amount:0});
-  renderAll();
-}
-function removeIncomeRow(i){ state.incomes.splice(i,1); renderAll(); }
+    function loadSaved() {
+      try {
+        const raw = localStorage.getItem('options_dashboard_v32');
+        return raw ? JSON.parse(raw) : null;
+      } catch { return null; }
+    }
+    function saveData() {
+      localStorage.setItem('options_dashboard_v32', JSON.stringify(data));
+      alert('저장했습니다.');
+    }
+    function resetData() {
+      data = JSON.parse(JSON.stringify(sampleData));
+      renderAll();
+    }
 
-function recalc(){
-  syncStateFromInputs();
-  const totalPremium = state.positions.reduce((s,p)=>s+num(p.premium),0);
-  const stockPnL = state.positions.reduce((s,p)=>s+(num(p.currentPrice)-num(p.avgCost))*num(p.shares),0);
-  const totalValue = totalPremium + stockPnL;
-  const hero = state.positions[0] ? `${state.positions[0].ticker} $${num(state.positions[0].currentPrice).toFixed(2)}` : '-';
-  document.getElementById('heroPrice').textContent = hero;
-  document.getElementById('totalPremium').textContent = money(totalPremium);
-  const stockEl = document.getElementById('stockPnL');
-  stockEl.textContent = money(stockPnL);
-  stockEl.className = 'value ' + (stockPnL >= 0 ? 'green' : 'red');
-  const totalEl = document.getElementById('totalValue');
-  totalEl.textContent = money(totalValue);
-  totalEl.className = 'value ' + (totalValue >= 0 ? 'green' : 'red');
+    function money(v) {
+      const sign = v >= 0 ? '+' : '-';
+      return sign + '$' + Math.abs(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+    function plainMoney(v) {
+      return '$' + Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
 
-  const tbody = document.querySelector('#summaryTable tbody');
-  tbody.innerHTML = '';
-  state.positions.forEach(p => {
-    const pnl = (num(p.currentPrice)-num(p.avgCost))*num(p.shares);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${p.ticker}</td>
-      <td>${num(p.shares).toLocaleString()}</td>
-      <td>$${num(p.avgCost).toFixed(2)}</td>
-      <td>$${num(p.currentPrice).toFixed(2)}</td>
-      <td class="${pnl>=0?'green':'red'}">${money(pnl)}</td>
-      <td class="green">${money(num(p.premium))}</td>`;
-    tbody.appendChild(tr);
-  });
-}
+    function renderPositions() {
+      const host = document.getElementById('positions');
+      host.innerHTML = '';
+      data.positions.forEach((pos, idx) => {
+        const node = document.getElementById('positionTpl').content.firstElementChild.cloneNode(true);
+        node.querySelector('.entry-title').textContent = `${idx + 1}. 포지션`;
+        node.querySelector('.delete-btn').onclick = () => { data.positions.splice(idx, 1); renderAll(); };
+        node.querySelectorAll('input').forEach(inp => {
+          const key = inp.dataset.key;
+          inp.value = pos[key] ?? '';
+          inp.oninput = () => {
+            pos[key] = (key === 'ticker') ? inp.value : Number(inp.value || 0);
+            renderKpisAndSummary();
+          };
+        });
+        host.appendChild(node);
+      });
+    }
 
-renderAll();
-</script>
+    function renderOptions() {
+      const host = document.getElementById('options');
+      host.innerHTML = '';
+      data.options.forEach((opt, idx) => {
+        const node = document.getElementById('optionTpl').content.firstElementChild.cloneNode(true);
+        node.querySelector('.entry-title').textContent = `${idx + 1}. 계약`;
+        node.querySelector('.delete-btn').onclick = () => { data.options.splice(idx, 1); renderAll(); };
+        node.querySelectorAll('input,select').forEach(el => {
+          const key = el.dataset.key;
+          if (!key) return;
+          el.value = opt[key] ?? '';
+          el.oninput = el.onchange = () => {
+            opt[key] = ['ticker','type','expiry','status'].includes(key) ? el.value : Number(el.value || 0);
+            renderKpisAndSummary();
+          };
+        });
+        const hidden = node.querySelector('input[data-key="type"]');
+        const opts = node.querySelectorAll('.type-option');
+        function syncType(v) {
+          hidden.value = v;
+          opt.type = v;
+          opts.forEach(btn => btn.classList.toggle('active', btn.dataset.value === v));
+          renderKpisAndSummary();
+        }
+        opts.forEach(btn => btn.onclick = () => syncType(btn.dataset.value));
+        syncType(opt.type || 'CC');
+        host.appendChild(node);
+      });
+    }
+
+    function renderKpisAndSummary() {
+      const realized = data.options.filter(o => o.status === 'closed').reduce((s,o)=>s + Number(o.premium || 0), 0);
+      const open = data.options.filter(o => o.status !== 'closed').reduce((s,o)=>s + Number(o.premium || 0), 0);
+      const totalPremium = realized + open;
+      const stockPnl = data.positions.reduce((s,p)=> s + ((Number(p.price||0) - Number(p.avg||0)) * Number(p.shares||0)), 0);
+      const totalValue = totalPremium + stockPnl;
+
+      const first = data.positions[0];
+      document.getElementById('headlinePrice').textContent = first ? `${first.ticker} $${Number(first.price||0).toFixed(2)}` : '-';
+      document.getElementById('realizedPremium').textContent = money(realized);
+      document.getElementById('openPremium').textContent = money(open);
+      document.getElementById('totalPremium').textContent = money(totalPremium);
+
+      const stockPnlEl = document.getElementById('stockPnl');
+      stockPnlEl.textContent = money(stockPnl);
+      stockPnlEl.className = 'kpi-value ' + (stockPnl >= 0 ? 'green' : 'red');
+
+      const totalValueEl = document.getElementById('totalValue');
+      totalValueEl.textContent = money(totalValue);
+      totalValueEl.className = 'kpi-value ' + (totalValue >= 0 ? 'green' : 'red');
+
+      const tbody = document.getElementById('summaryBody');
+      tbody.innerHTML = '';
+      data.positions.forEach(pos => {
+        const tr = document.createElement('tr');
+        const pnl = (Number(pos.price||0) - Number(pos.avg||0)) * Number(pos.shares||0);
+        tr.innerHTML = `
+          <td>${pos.ticker || ''}</td>
+          <td>${Number(pos.shares||0).toLocaleString()}</td>
+          <td>${plainMoney(Number(pos.avg||0))}</td>
+          <td>${plainMoney(Number(pos.price||0))}</td>
+          <td class="${pnl >= 0 ? 'green' : 'red'}">${money(pnl)}</td>
+          <td class="green">${money(Number(pos.premium||0))}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderAll() {
+      renderPositions();
+      renderOptions();
+      renderKpisAndSummary();
+    }
+
+    document.getElementById('saveBtn').onclick = saveData;
+    document.getElementById('resetBtn').onclick = resetData;
+    document.getElementById('addPositionBtn').onclick = () => {
+      data.positions.push({ ticker: '', shares: 0, avg: 0, price: 0, premium: 0 });
+      renderAll();
+    };
+    document.getElementById('addOptionBtn').onclick = () => {
+      data.options.push({ ticker: '', type: 'CC', expiry: '', strike: 0, contracts: 0, premium: 0, status: 'open' });
+      renderAll();
+    };
+
+    renderAll();
+  </script>
 </body>
 </html>
