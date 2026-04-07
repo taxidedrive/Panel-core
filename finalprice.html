@@ -1,496 +1,366 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Final Account View Compact</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Final Account View Fixed</title>
   <style>
     :root{
-      --bg:#071426;
-      --panel:#0c1d34;
-      --panel2:#102544;
-      --line:#28456f;
-      --text:#eef4ff;
-      --muted:#a8bad8;
-      --accent:#58d68d;
-      --warn:#ffb454;
-      --danger:#ff7b72;
+      --bg:#071426; --panel:#0c1d34; --line:#28456f; --text:#eef4ff;
+      --muted:#a8bad8; --accent:#58d68d; --warn:#ffb454; --blue:#6cb6ff;
     }
     *{box-sizing:border-box}
     body{
-      margin:0;
-      background:linear-gradient(180deg,#06111f 0%, #091a31 100%);
+      margin:0; background:linear-gradient(180deg,#06111f 0%, #091a31 100%);
       color:var(--text);
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
     }
-    .wrap{
-      max-width:760px;
-      margin:0 auto;
-      padding:12px 12px 28px;
-    }
-    .title{
-      font-size:22px;
-      font-weight:800;
-      margin:4px 0 6px;
-    }
-    .sub{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.45;
-      margin-bottom:10px;
-    }
-    .card{
-      background:rgba(12,29,52,.96);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px;
-      margin-bottom:10px;
-      box-shadow:0 8px 24px rgba(0,0,0,.18);
-    }
-    .minihead{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-      margin-bottom:8px;
-    }
-    .minihead h2{
-      margin:0;
-      font-size:17px;
-      font-weight:800;
-    }
-    .tag{
-      font-size:11px;
-      color:var(--bg);
-      background:var(--accent);
-      padding:4px 8px;
-      border-radius:999px;
-      font-weight:700;
-      white-space:nowrap;
-    }
-    .hint{
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.45;
-      margin-top:2px;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:8px;
-    }
-    @media (max-width:520px){
-      .grid{grid-template-columns:1fr 1fr;}
-    }
-    .field{
-      min-width:0;
-    }
-    .field.full{grid-column:1/-1}
-    label{
-      display:block;
-      font-size:12px;
-      color:#dbe7fb;
-      margin:0 0 5px;
-      font-weight:700;
-      line-height:1.25;
-    }
-    .source{
-      display:block;
-      font-size:11px;
-      color:var(--muted);
-      margin-top:3px;
-      font-weight:500;
-    }
-    input, select{
-      width:100%;
-      border:1px solid var(--line);
-      background:#071426;
-      color:var(--text);
-      border-radius:12px;
-      padding:11px 12px;
-      font-size:16px;
-      outline:none;
-    }
-    input:focus, select:focus{
-      border-color:#5da0ff;
-      box-shadow:0 0 0 2px rgba(93,160,255,.15);
-    }
+    .wrap{max-width:820px; margin:0 auto; padding:12px 12px 28px}
+    .title{font-size:22px; font-weight:800; margin:4px 0 6px}
+    .sub{color:var(--muted); font-size:13px; line-height:1.45; margin-bottom:10px}
     .summary{
-      position:sticky;
-      top:8px;
-      z-index:5;
-      background:rgba(10,25,45,.92);
-      backdrop-filter:blur(8px);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px;
-      margin-bottom:10px;
+      position:sticky; top:8px; z-index:5; background:rgba(10,25,45,.94);
+      backdrop-filter:blur(8px); border:1px solid var(--line); border-radius:16px;
+      padding:12px; margin-bottom:10px;
     }
-    .summarygrid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:8px;
+    .grid,.summarygrid{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+    .card{
+      background:rgba(12,29,52,.96); border:1px solid var(--line); border-radius:16px;
+      padding:12px; margin-bottom:10px;
     }
-    .box{
-      background:#08152a;
-      border:1px solid #1f3a61;
-      border-radius:14px;
-      padding:10px;
+    .minihead{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px}
+    .minihead h2{margin:0; font-size:17px; font-weight:800}
+    .tag{
+      font-size:11px; color:#06111f; background:var(--accent); padding:4px 8px;
+      border-radius:999px; font-weight:700; white-space:nowrap
     }
-    .k{
-      color:var(--muted);
-      font-size:12px;
-      margin-bottom:4px;
-    }
-    .v{
-      font-size:22px;
-      font-weight:800;
-      line-height:1.2;
-      word-break:break-word;
-    }
+    .tag.blue{background:var(--blue)}
+    .tag.yellow{background:var(--warn)}
+    .box{background:#08152a; border:1px solid #1f3a61; border-radius:14px; padding:10px}
+    .k{color:var(--muted); font-size:12px; margin-bottom:4px}
+    .v{font-size:22px; font-weight:800; line-height:1.2; word-break:break-word}
     .v.small{font-size:18px}
-    .green{color:var(--accent)}
-    .red{color:var(--danger)}
-    .yellow{color:var(--warn)}
-    .buttons{
-      display:flex;
-      gap:8px;
-      margin-top:10px;
+    .field{min-width:0}
+    .field.full{grid-column:1/-1}
+    label{display:block; font-size:12px; color:#dbe7fb; margin:0 0 5px; font-weight:700; line-height:1.25}
+    .source{display:block; font-size:11px; color:var(--muted); margin-top:3px; font-weight:500}
+    input,select{
+      width:100%; border:1px solid var(--line); background:#071426; color:var(--text);
+      border-radius:12px; padding:11px 12px; font-size:16px; outline:none;
     }
+    .buttons{display:flex; gap:8px; margin-top:10px}
     button{
-      flex:1;
-      border:0;
-      border-radius:12px;
-      padding:12px 10px;
-      font-weight:800;
-      font-size:15px;
-      cursor:pointer;
+      flex:1; border:0; border-radius:12px; padding:12px 10px; font-weight:800;
+      font-size:15px; cursor:pointer;
     }
-    .primary{background:var(--accent); color:#062013;}
-    .secondary{background:#183152; color:var(--text); border:1px solid var(--line);}
-    details{
-      border:1px solid var(--line);
-      border-radius:14px;
-      background:#0a1930;
-      padding:8px 10px;
-      margin-top:8px;
-    }
-    summary{
-      cursor:pointer;
-      font-weight:800;
-      font-size:14px;
-      outline:none;
-    }
-    .list{
-      margin:8px 0 0;
-      padding-left:18px;
-      color:var(--muted);
-      line-height:1.5;
-      font-size:13px;
-    }
-    .foot{
-      color:var(--muted);
-      font-size:12px;
-      text-align:center;
-      margin-top:14px;
-    }
+    .primary{background:var(--accent); color:#062013}
+    .secondary{background:#183152; color:var(--text); border:1px solid var(--line)}
+    .hint{color:var(--muted); font-size:12px; line-height:1.5}
+    .foot{color:var(--muted); font-size:12px; text-align:center; margin-top:14px}
   </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="title">파이널 계좌뷰 · 컴팩트</div>
-  <div class="sub">핸드폰에서 덜 내려가게 줄였고, 로빈훗에서 보는 순서에 가깝게 배치했습니다. 각 입력칸 아래에 <b>어느 페이지에서 보는지</b>도 넣었습니다.</div>
+  <div class="title">파이널 계좌뷰 · 수정본</div>
+  <div class="sub">버튼이 안 눌리는 문제를 피하려고 구조를 더 단순하게 고쳤습니다. 만기일 날짜 칸은 뺐고, <b>만기 예상 주가</b>만 넣으면 계산되게 했습니다. 셀풋은 기본값이 <b>아니오</b>입니다.</div>
 
   <div class="summary">
     <div class="minihead">
-      <h2>만기 결과 요약</h2>
+      <h2>합산 만기 결과</h2>
       <div class="tag">상단 고정</div>
     </div>
     <div class="summarygrid">
       <div class="box">
         <div class="k">예상 만기 계좌뷰</div>
-        <div id="finalAccount" class="v">$0</div>
+        <div id="finalAccount" class="v">$0.00</div>
       </div>
       <div class="box">
-        <div class="k">커버드콜 처리</div>
-        <div id="ccStatus" class="v small">-</div>
+        <div class="k">제거되는 현재 옵션값 합계</div>
+        <div id="removedOptionValue" class="v small">$0.00</div>
       </div>
       <div class="box">
-        <div class="k">옵션 만기 영향</div>
-        <div id="optionImpact" class="v small">$0</div>
+        <div class="k">SOFI 처리</div>
+        <div id="sofiStatus" class="v small">-</div>
       </div>
       <div class="box">
-        <div class="k">주식 만기 가치</div>
-        <div id="shareImpact" class="v small">$0</div>
+        <div class="k">UNH 처리</div>
+        <div id="unhStatus" class="v small">-</div>
       </div>
     </div>
     <div class="buttons">
-      <button class="primary" onclick="calculate()">계산하기</button>
-      <button class="secondary" onclick="fillExample()">예시 넣기</button>
+      <button type="button" class="primary" id="calcBtn">계산하기</button>
+      <button type="button" class="secondary" id="exampleBtn">예시 넣기</button>
     </div>
   </div>
 
   <div class="card">
     <div class="minihead">
       <h2>1) 현재 계좌</h2>
-      <div class="tag">Robinhood 메인</div>
+      <div class="tag yellow">Robinhood 메인</div>
     </div>
     <div class="grid">
       <div class="field">
         <label>현재 계좌뷰 금액
           <span class="source">로빈훗 메인 계좌 화면</span>
         </label>
-        <input id="currentAccount" type="number" step="0.01" placeholder="예: 344469">
+        <input id="currentAccount" inputmode="decimal" placeholder="예: 344469">
       </div>
       <div class="field">
-        <label>현재 전체 옵션 평가금액
-          <span class="source">메인 화면 > Options > Value</span>
+        <label>메모
+          <span class="source">이 버전은 종목별 옵션값 입력 방식</span>
         </label>
-        <input id="currentOptionValue" type="number" step="0.01" placeholder="예: 69600">
+        <input value="SOFI와 UNH에서 각각 Options > Value 입력" disabled>
       </div>
     </div>
-    <details>
-      <summary>왜 이 두 칸만 있나요?</summary>
-      <ul class="list">
-        <li>현재 계좌뷰에서 이미 주식 가치와 옵션 평가가 함께 반영되어 있습니다.</li>
-        <li>만기 계산은 현재 계좌뷰에서 <b>현재 옵션 평가금액</b>을 빼고, <b>만기 시점 옵션 결과</b>를 다시 더하는 방식입니다.</li>
-      </ul>
-    </details>
   </div>
 
   <div class="card">
     <div class="minihead">
-      <h2>2) 커버드콜</h2>
-      <div class="tag">주식 + 콜 페이지</div>
+      <h2>2) SOFI</h2>
+      <div class="tag">SOFI 주식 + 콜</div>
     </div>
     <div class="grid">
+      <div class="field">
+        <label>현재 SOFI 옵션 평가금액
+          <span class="source">SOFI 종목 페이지 > Options > Value</span>
+        </label>
+        <input id="sofiCurrentOptionValue" inputmode="decimal" placeholder="예: 20250">
+      </div>
       <div class="field">
         <label>보유 주식수
           <span class="source">SOFI 주식 페이지 > Your position > Shares</span>
         </label>
-        <input id="shareCount" type="number" step="1" placeholder="15000">
+        <input id="sofiShareCount" inputmode="decimal" placeholder="15000">
       </div>
-      <div class="field">
-        <label>주식 평균단가
-          <span class="source">SOFI 주식 페이지 > Your position > Average cost</span>
-        </label>
-        <input id="avgCost" type="number" step="0.01" placeholder="17.54">
-      </div>
-
       <div class="field">
         <label>현재 주가
           <span class="source">SOFI 주식 페이지 상단 가격</span>
         </label>
-        <input id="currentStockPrice" type="number" step="0.01" placeholder="16.15">
+        <input id="sofiCurrentStockPrice" inputmode="decimal" placeholder="16.15">
       </div>
       <div class="field">
         <label>만기 예상 주가
           <span class="source">직접 입력</span>
         </label>
-        <input id="expiryStockPrice" type="number" step="0.01" placeholder="16.00">
+        <input id="sofiExpiryStockPrice" inputmode="decimal" placeholder="16.00">
       </div>
-
       <div class="field">
         <label>콜 행사가
-          <span class="source">SOFI $16 Call 페이지 제목</span>
+          <span class="source">SOFI Call 페이지 제목</span>
         </label>
-        <input id="callStrike" type="number" step="0.01" placeholder="16">
+        <input id="sofiCallStrike" inputmode="decimal" placeholder="16">
       </div>
       <div class="field">
         <label>콜 계약 수
           <span class="source">SOFI Call 페이지 > Your position > Contracts</span>
         </label>
-        <input id="callContracts" type="number" step="1" placeholder="150">
+        <input id="sofiCallContracts" inputmode="decimal" placeholder="150">
       </div>
-
-      <div class="field">
-        <label>평균 크레딧
-          <span class="source">SOFI Call 페이지 > Average credit</span>
-        </label>
-        <input id="callCredit" type="number" step="0.01" placeholder="1.28">
-      </div>
-      <div class="field">
-        <label>현재 옵션 가격
-          <span class="source">SOFI Call 페이지 > Current price</span>
-        </label>
-        <input id="currentCallPrice" type="number" step="0.01" placeholder="1.35">
-      </div>
-
-      <div class="field full">
-        <label>만기일 메모
-          <span class="source">SOFI Call 페이지 > Expiration date</span>
-        </label>
-        <input id="expiryMemo" type="text" placeholder="예: 5/1">
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="minihead">
-      <h2>3) 셀풋 (선택)</h2>
-      <div class="tag">있으면만 입력</div>
-    </div>
-    <div class="grid">
       <div class="field">
         <label>셀풋 사용 여부
-          <span class="source">없으면 아니오</span>
+          <span class="source">선택하지 않으면 아니오 그대로 두세요</span>
         </label>
-        <select id="usePut" onchange="togglePut()">
-          <option value="no">아니오</option>
+        <select id="sofiUsePut">
+          <option value="no" selected>아니오</option>
           <option value="yes">예</option>
         </select>
       </div>
       <div class="field">
         <label>풋 행사가
-          <span class="source">풋 옵션 페이지 제목</span>
+          <span class="source">셀풋이 있을 때만 입력</span>
         </label>
-        <input id="putStrike" type="number" step="0.01" placeholder="16.5" disabled>
+        <input id="sofiPutStrike" inputmode="decimal" placeholder="16.5">
       </div>
       <div class="field">
         <label>풋 계약 수
-          <span class="source">풋 옵션 페이지 > Contracts</span>
+          <span class="source">셀풋이 있을 때만 입력</span>
         </label>
-        <input id="putContracts" type="number" step="1" placeholder="20" disabled>
-      </div>
-      <div class="field">
-        <label>풋 평균 크레딧
-          <span class="source">풋 옵션 페이지 > Average credit</span>
-        </label>
-        <input id="putCredit" type="number" step="0.01" placeholder="0.60" disabled>
+        <input id="sofiPutContracts" inputmode="decimal" placeholder="20">
       </div>
     </div>
-    <details>
-      <summary>셀풋 계산 방식</summary>
-      <ul class="list">
-        <li>만기 주가가 행사가보다 높으면 풋은 0으로 종료되고 프리미엄만 남습니다.</li>
-        <li>만기 주가가 행사가보다 낮으면 배정되어 추가 주식을 사는 것으로 계산합니다.</li>
-      </ul>
-    </details>
+  </div>
+
+  <div class="card">
+    <div class="minihead">
+      <h2>3) UNH</h2>
+      <div class="tag blue">UNH 주식 + 콜</div>
+    </div>
+    <div class="grid">
+      <div class="field">
+        <label>현재 UNH 옵션 평가금액
+          <span class="source">UNH 종목 페이지 > Options > Value</span>
+        </label>
+        <input id="unhCurrentOptionValue" inputmode="decimal" placeholder="예: 49600">
+      </div>
+      <div class="field">
+        <label>보유 주식수
+          <span class="source">UNH 주식 페이지 > Your position > Shares</span>
+        </label>
+        <input id="unhShareCount" inputmode="decimal" placeholder="2000">
+      </div>
+      <div class="field">
+        <label>현재 주가
+          <span class="source">UNH 주식 페이지 상단 가격</span>
+        </label>
+        <input id="unhCurrentStockPrice" inputmode="decimal" placeholder="299.83">
+      </div>
+      <div class="field">
+        <label>만기 예상 주가
+          <span class="source">직접 입력</span>
+        </label>
+        <input id="unhExpiryStockPrice" inputmode="decimal" placeholder="265.00">
+      </div>
+      <div class="field">
+        <label>콜 행사가
+          <span class="source">UNH Call 페이지 제목</span>
+        </label>
+        <input id="unhCallStrike" inputmode="decimal" placeholder="265">
+      </div>
+      <div class="field">
+        <label>콜 계약 수
+          <span class="source">UNH Call 페이지 > Your position > Contracts</span>
+        </label>
+        <input id="unhCallContracts" inputmode="decimal" placeholder="20">
+      </div>
+    </div>
   </div>
 
   <div class="card">
     <div class="minihead">
       <h2>4) 계산 설명</h2>
-      <div class="tag">직관용</div>
+      <div class="tag yellow">직관용</div>
     </div>
-    <div id="explain" class="hint">입력 후 계산하기를 누르면 여기 설명이 나옵니다.</div>
+    <div id="explain" class="hint">입력 후 계산하기를 누르면 여기에 설명이 나옵니다.</div>
   </div>
 
-  <div class="foot">이 파일은 모바일에서 한 화면에 더 많이 보이도록 간격을 줄인 버전입니다.</div>
+  <div class="foot">버튼 문제가 다시 생기지 않도록 onclick 대신 안전한 방식으로 다시 연결했습니다.</div>
 </div>
 
 <script>
-  function fmt(n){
-    if (!isFinite(n)) return '$0';
-    return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(n);
+(function(){
+  function n(id){
+    var el = document.getElementById(id);
+    if(!el) return 0;
+    var v = (el.value || '').toString().replace(/,/g,'').trim();
+    if(v === '') return 0;
+    var x = Number(v);
+    return isNaN(x) ? 0 : x;
   }
 
-  function num(id){
-    const v = document.getElementById(id).value;
-    return v === '' ? 0 : Number(v);
+  function fmt(x){
+    if(!isFinite(x)) x = 0;
+    return new Intl.NumberFormat('en-US', {
+      style:'currency',
+      currency:'USD',
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
+    }).format(x);
   }
 
-  function togglePut(){
-    const on = document.getElementById('usePut').value === 'yes';
-    ['putStrike','putContracts','putCredit'].forEach(id => {
-      document.getElementById(id).disabled = !on;
-    });
-  }
+  function calcTicker(prefix, hasPut){
+    var currentOptionValue = n(prefix + 'CurrentOptionValue');
+    var shareCount = n(prefix + 'ShareCount');
+    var currentStockPrice = n(prefix + 'CurrentStockPrice');
+    var expiryStockPrice = n(prefix + 'ExpiryStockPrice');
+    var callStrike = n(prefix + 'CallStrike');
+    var callContracts = n(prefix + 'CallContracts');
 
-  function calculate(){
-    const currentAccount = num('currentAccount');
-    const currentOptionValue = num('currentOptionValue');
+    var coveredShares = callContracts * 100;
+    var uncoveredShares = Math.max(0, shareCount - coveredShares);
 
-    const shareCount = num('shareCount');
-    const avgCost = num('avgCost');
-    const currentStockPrice = num('currentStockPrice');
-    const expiryStockPrice = num('expiryStockPrice');
-
-    const callStrike = num('callStrike');
-    const callContracts = num('callContracts');
-    const callCredit = num('callCredit');
-    const currentCallPrice = num('currentCallPrice');
-
-    const coveredShares = callContracts * 100;
-    const uncoveredShares = Math.max(0, shareCount - coveredShares);
-    const totalCallPremium = callCredit * coveredShares;
-
-    let ccStatus = '';
-    let ccValueAtExpiry = 0;
-    let coveredShareValue = 0;
-
-    if (coveredShares > 0 && expiryStockPrice >= callStrike){
-      ccStatus = '배정(매도)';
-      ccValueAtExpiry = totalCallPremium;
-      coveredShareValue = coveredShares * callStrike;
-    } else {
-      ccStatus = '주식 유지';
-      ccValueAtExpiry = totalCallPremium;
-      coveredShareValue = coveredShares * expiryStockPrice;
+    var status = '주식 유지';
+    var coveredValue = coveredShares * expiryStockPrice;
+    if(coveredShares > 0 && expiryStockPrice >= callStrike){
+      status = '배정(매도)';
+      coveredValue = coveredShares * callStrike;
     }
 
-    const uncoveredShareValue = uncoveredShares * expiryStockPrice;
-    const shareValueAtExpiry = coveredShareValue + uncoveredShareValue;
+    var shareValueAtExpiry = coveredValue + (uncoveredShares * expiryStockPrice);
+    var currentShareValue = shareCount * currentStockPrice;
 
-    let putEffect = 0;
-    let putText = '셀풋 없음';
-    if (document.getElementById('usePut').value === 'yes'){
-      const putStrike = num('putStrike');
-      const putContracts = num('putContracts');
-      const putCredit = num('putCredit');
-      const putShares = putContracts * 100;
-      const totalPutPremium = putCredit * putShares;
+    var putEffect = 0;
+    var putText = '셀풋 없음';
 
-      if (expiryStockPrice < putStrike){
-        const intrinsicLoss = (putStrike - expiryStockPrice) * putShares;
-        putEffect = totalPutPremium - intrinsicLoss;
-        putText = `셀풋 배정 반영 (${fmt(putEffect)})`;
-      } else {
-        putEffect = totalPutPremium;
-        putText = `셀풋 0 종료 (${fmt(putEffect)})`;
+    if(hasPut){
+      var usePut = document.getElementById(prefix + 'UsePut').value;
+      if(usePut === 'yes'){
+        var putStrike = n(prefix + 'PutStrike');
+        var putContracts = n(prefix + 'PutContracts');
+        var putShares = putContracts * 100;
+        if(expiryStockPrice < putStrike){
+          putEffect = -((putStrike - expiryStockPrice) * putShares);
+          putText = '셀풋 배정 영향 ' + fmt(putEffect);
+        } else {
+          putText = '셀풋 0 종료';
+        }
       }
     }
 
-    // 현재 계좌뷰에서 현재 옵션 평가를 제거하고, 만기 결과를 넣는 구조
-    const baseWithoutCurrentOptions = currentAccount + currentOptionValue;
-    const finalAccount = baseWithoutCurrentOptions - (shareCount * currentStockPrice) + shareValueAtExpiry + putEffect;
+    return {
+      currentOptionValue: currentOptionValue,
+      currentShareValue: currentShareValue,
+      shareValueAtExpiry: shareValueAtExpiry,
+      putEffect: putEffect,
+      putText: putText,
+      status: status
+    };
+  }
+
+  function calculate(){
+    var currentAccount = n('currentAccount');
+
+    var sofi = calcTicker('sofi', true);
+    var unh = calcTicker('unh', false);
+
+    var totalCurrentOptionValue = sofi.currentOptionValue + unh.currentOptionValue;
+    var totalCurrentShareValue = sofi.currentShareValue + unh.currentShareValue;
+    var totalExpiryShareValue = sofi.shareValueAtExpiry + unh.shareValueAtExpiry;
+
+    var finalAccount = currentAccount
+      + totalCurrentOptionValue
+      - totalCurrentShareValue
+      + totalExpiryShareValue
+      + sofi.putEffect
+      + unh.putEffect;
 
     document.getElementById('finalAccount').textContent = fmt(finalAccount);
-    document.getElementById('ccStatus').textContent = ccStatus;
-    document.getElementById('optionImpact').textContent = fmt(totalCallPremium + putEffect);
-    document.getElementById('shareImpact').textContent = fmt(shareValueAtExpiry);
+    document.getElementById('removedOptionValue').textContent = fmt(totalCurrentOptionValue);
+    document.getElementById('sofiStatus').textContent = sofi.status;
+    document.getElementById('unhStatus').textContent = unh.status;
 
-    document.getElementById('ccStatus').className = 'v small ' + (ccStatus.includes('배정') ? 'yellow' : 'green');
-
-    const explain = `
-현재 계좌뷰 ${fmt(currentAccount)} 에서 현재 옵션 평가 ${fmt(currentOptionValue)} 를 제거하고,
-현재 주식 가치 ${fmt(shareCount * currentStockPrice)} 를 만기 주식 가치 ${fmt(shareValueAtExpiry)} 로 교체했습니다.
-커버드콜 프리미엄 ${fmt(totalCallPremium)} 를 반영했고,
-${putText} 상태로 계산했습니다.
-평단 ${avgCost ? fmt(avgCost) : '-'} 은 확인용으로 남겨두었습니다.
-현재 콜 가격 ${currentCallPrice ? fmt(currentCallPrice) : '$0'} 은 참고용이며, 만기 계산의 핵심은 아닙니다.
-    `;
-    document.getElementById('explain').textContent = explain.trim();
+    document.getElementById('explain').textContent =
+      '현재 계좌뷰 ' + fmt(currentAccount) +
+      ' 에서 SOFI 옵션값 ' + fmt(sofi.currentOptionValue) +
+      ' 와 UNH 옵션값 ' + fmt(unh.currentOptionValue) +
+      ' 을 제거하고, 현재 주식가치를 만기 주식가치로 바꿔 계산했습니다. ' +
+      'SOFI는 ' + sofi.putText + ' 로 반영했습니다.';
   }
 
   function fillExample(){
-    document.getElementById('currentAccount').value = 344469;
-    document.getElementById('currentOptionValue').value = 69600;
-    document.getElementById('shareCount').value = 15000;
-    document.getElementById('avgCost').value = 17.54;
-    document.getElementById('currentStockPrice').value = 16.15;
-    document.getElementById('expiryStockPrice').value = 16.00;
-    document.getElementById('callStrike').value = 16;
-    document.getElementById('callContracts').value = 150;
-    document.getElementById('callCredit').value = 1.28;
-    document.getElementById('currentCallPrice').value = 1.35;
-    document.getElementById('expiryMemo').value = '5/1';
-    document.getElementById('usePut').value = 'no';
-    togglePut();
+    document.getElementById('currentAccount').value = '344469';
+    document.getElementById('sofiCurrentOptionValue').value = '20250';
+    document.getElementById('sofiShareCount').value = '15001';
+    document.getElementById('sofiCurrentStockPrice').value = '16.15';
+    document.getElementById('sofiExpiryStockPrice').value = '16.00';
+    document.getElementById('sofiCallStrike').value = '16';
+    document.getElementById('sofiCallContracts').value = '150';
+    document.getElementById('sofiUsePut').value = 'no';
+    document.getElementById('sofiPutStrike').value = '';
+    document.getElementById('sofiPutContracts').value = '';
+
+    document.getElementById('unhCurrentOptionValue').value = '49600';
+    document.getElementById('unhShareCount').value = '2000';
+    document.getElementById('unhCurrentStockPrice').value = '299.83';
+    document.getElementById('unhExpiryStockPrice').value = '265';
+    document.getElementById('unhCallStrike').value = '265';
+    document.getElementById('unhCallContracts').value = '20';
+
     calculate();
   }
 
-  togglePut();
+  document.getElementById('calcBtn').addEventListener('click', calculate);
+  document.getElementById('exampleBtn').addEventListener('click', fillExample);
+})();
 </script>
 </body>
 </html>
