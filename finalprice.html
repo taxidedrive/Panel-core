@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Final Account View Calculator</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --card2:#1f2937;
+      --text:#f8fafc;
+      --muted:#cbd5e1;
+      --accent:#22c55e;
+      --warn:#f59e0b;
+      --border:#334155;
+      --input:#0b1220;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", Arial, sans-serif;
+      background:linear-gradient(180deg,#0b1220 0%, #111827 100%);
+      color:var(--text);
+      padding:20px;
+    }
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+    }
+    h1{
+      font-size:30px;
+      margin:0 0 8px 0;
+    }
+    .sub{
+      color:var(--muted);
+      margin-bottom:18px;
+      line-height:1.5;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap:18px;
+    }
+    .card{
+      background:rgba(17,24,39,.92);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+    }
+    .section-title{
+      font-size:18px;
+      font-weight:700;
+      margin:0 0 14px 0;
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 170px;
+      gap:12px;
+      align-items:center;
+      margin-bottom:10px;
+    }
+    label{
+      color:#e2e8f0;
+      line-height:1.4;
+    }
+    input, select{
+      width:100%;
+      background:var(--input);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px 12px;
+      font-size:15px;
+      outline:none;
+    }
+    input:focus, select:focus{
+      border-color:#60a5fa;
+    }
+    .small{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:-4px;
+      margin-bottom:10px;
+    }
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    button{
+      border:0;
+      border-radius:12px;
+      padding:12px 16px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .primary{ background:var(--accent); color:#052e16; }
+    .secondary{ background:#334155; color:white; }
+    .result-big{
+      background:linear-gradient(135deg, #052e16, #14532d);
+      border:1px solid #166534;
+      border-radius:18px;
+      padding:16px;
+      margin-bottom:14px;
+    }
+    .result-big .k{
+      color:#bbf7d0;
+      font-size:14px;
+      margin-bottom:8px;
+    }
+    .result-big .v{
+      font-size:34px;
+      font-weight:800;
+      line-height:1.1;
+    }
+    .pill{
+      display:inline-block;
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:14px;
+      margin-top:10px;
+    }
+    .pill.assign{ background:#7c2d12; color:#fed7aa; }
+    .pill.keep{ background:#0c4a6e; color:#bae6fd; }
+    .table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:6px;
+    }
+    .table th, .table td{
+      padding:10px 8px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      font-size:14px;
+    }
+    .table th{ color:#94a3b8; font-weight:600; }
+    .pos{ color:#86efac; font-weight:700;}
+    .neg{ color:#fca5a5; font-weight:700;}
+    .muted{ color:var(--muted); }
+    .note{
+      background:#111827;
+      border-left:4px solid var(--warn);
+      padding:12px 14px;
+      border-radius:10px;
+      color:#fde68a;
+      margin-top:14px;
+      line-height:1.5;
+      font-size:14px;
+    }
+    .footer{
+      color:#94a3b8;
+      margin-top:18px;
+      font-size:13px;
+      line-height:1.5;
+    }
+    .stack{
+      display:grid;
+      gap:14px;
+    }
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+      .row{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Final Account View Calculator</h1>
+    <div class="sub">
+      만기일 예상 주가를 넣으면, 커버드콜/셀풋 기준으로 <b>배정 여부</b>, <b>주식 잔존 여부</b>, 
+      <b>예상 계좌뷰</b>를 계산해주는 HTML 계산기입니다.
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="section-title">1) 기본 계좌 입력</div>
+
+        <div class="row">
+          <label for="currentAccount">현재 계좌뷰 금액</label>
+          <input id="currentAccount" type="number" step="0.01" value="344469" />
+        </div>
+        <div class="small">예: 현재 로빈후드 계좌뷰 금액</div>
+
+        <div class="row">
+          <label for="currentLiability">현재 전체 옵션 부채(평가금액)</label>
+          <input id="currentLiability" type="number" step="0.01" value="69600" />
+        </div>
+        <div class="small">만기 때 옵션이 0이 되며 풀릴 금액. 모르면 대략치 입력.</div>
+
+        <div class="section-title" style="margin-top:18px;">2) 커버드콜 포지션</div>
+
+        <div class="row">
+          <label for="shares">보유 주식수</label>
+          <input id="shares" type="number" step="1" value="15000" />
+        </div>
+
+        <div class="row">
+          <label for="stockBasis">주식 평균단가</label>
+          <input id="stockBasis" type="number" step="0.01" value="17.54" />
+        </div>
+
+        <div class="row">
+          <label for="callStrike">콜 행사가</label>
+          <input id="callStrike" type="number" step="0.01" value="16" />
+        </div>
+
+        <div class="row">
+          <label for="callContracts">콜 계약 수</label>
+          <input id="callContracts" type="number" step="1" value="150" />
+        </div>
+
+        <div class="row">
+          <label for="expiryPrice">만기 예상 주가</label>
+          <input id="expiryPrice" type="number" step="0.01" value="16.00" />
+        </div>
+
+        <div class="small">만기 주가가 행사가 이상이면 배정(주식 매도)으로 처리합니다.</div>
+
+        <div class="section-title" style="margin-top:18px;">3) 셀풋 포지션 (선택)</div>
+
+        <div class="row">
+          <label for="putEnabled">셀풋 사용 여부</label>
+          <select id="putEnabled">
+            <option value="yes" selected>예</option>
+            <option value="no">아니오</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label for="putStrike">풋 행사가</label>
+          <input id="putStrike" type="number" step="0.01" value="15.5" />
+        </div>
+
+        <div class="row">
+          <label for="putContracts">풋 계약 수</label>
+          <input id="putContracts" type="number" step="1" value="20" />
+        </div>
+
+        <div class="row">
+          <label for="putBasis">풋 배정 시 매수단가 기준</label>
+          <input id="putBasis" type="number" step="0.01" value="15.5" />
+        </div>
+
+        <div class="small">풋이 배정되면 추가 주식 = 풋 계약 수 × 100</div>
+
+        <div class="btns">
+          <button class="primary" onclick="calculate()">계산하기</button>
+          <button class="secondary" onclick="loadExample()">예시값 다시 넣기</button>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <div class="section-title">예상 결과</div>
+          <div class="result-big">
+            <div class="k">만기 예상 계좌뷰</div>
+            <div class="v" id="finalAccountView">$0</div>
+            <div id="assignmentPill" class="pill keep">계산 대기</div>
+          </div>
+
+          <table class="table">
+            <tr><th>항목</th><th>값</th></tr>
+            <tr><td>현재 계좌뷰</td><td id="outCurrent">$0</td></tr>
+            <tr><td>옵션 부채 해소(+)</td><td id="outLiability" class="pos">$0</td></tr>
+            <tr><td>커버드콜 주식 손익</td><td id="outSharePnL">$0</td></tr>
+            <tr><td>셀풋 배정 주식 손익</td><td id="outPutPnL">$0</td></tr>
+            <tr><td>배정 후 남는 주식 수</td><td id="outRemainingShares">0</td></tr>
+            <tr><td>풋 배정 추가 주식 수</td><td id="outPutShares">0</td></tr>
+            <tr><td>최종 총 주식 수</td><td id="outTotalShares">0</td></tr>
+            <tr><td>최종 주식 평가금액</td><td id="outStockValue">$0</td></tr>
+          </table>
+
+          <div class="note" id="summaryNote">
+            아직 계산 전입니다.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">계산 로직 설명</div>
+          <div class="muted" style="line-height:1.7;">
+            1) <b>현재 계좌뷰</b>에<br>
+            2) <b>현재 옵션 부채가 만기 때 0이 되는 금액</b>을 더하고,<br>
+            3) <b>주식 손익 변화</b>를 반영합니다.<br><br>
+
+            커버드콜은:<br>
+            - 만기 주가 ≥ 행사가 → 주식이 행사가에 팔림<br>
+            - 만기 주가 &lt; 행사가 → 주식이 남음<br><br>
+
+            셀풋은:<br>
+            - 만기 주가 &lt; 행사가 → 추가 배정<br>
+            - 만기 주가 ≥ 행사가 → 소멸<br>
+          </div>
+          <div class="footer">
+            팁: 이름은 finalprice.html, final_account_view.html, 마지막재산.html 등으로 바꿔서 GitHub Pages에 올리면 됩니다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function n(id){
+  const v = document.getElementById(id).value;
+  return Number(v || 0);
+}
+function money(v){
+  const sign = v < 0 ? "-" : "";
+  const abs = Math.abs(v);
+  return sign + "$" + abs.toLocaleString("en-US", {maximumFractionDigits:2, minimumFractionDigits:2});
+}
+function setText(id, value, isMoney=false){
+  document.getElementById(id).textContent = isMoney ? money(value) : value;
+}
+function calculate(){
+  const currentAccount = n("currentAccount");
+  const currentLiability = n("currentLiability");
+
+  const shares = n("shares");
+  const stockBasis = n("stockBasis");
+  const callStrike = n("callStrike");
+  const callContracts = n("callContracts");
+  const expiryPrice = n("expiryPrice");
+
+  const putEnabled = document.getElementById("putEnabled").value === "yes";
+  const putStrike = n("putStrike");
+  const putContracts = n("putContracts");
+  const putBasis = n("putBasis");
+
+  const callCoveredShares = Math.min(shares, callContracts * 100);
+  const callAssigned = expiryPrice >= callStrike;
+
+  let coveredCallSharePnL = 0;
+  let remainingShares = shares;
+  let stockValue = 0;
+  let assignmentText = "";
+
+  if(callAssigned){
+    coveredCallSharePnL = (callStrike - stockBasis) * callCoveredShares;
+    remainingShares = shares - callCoveredShares;
+    stockValue = remainingShares * expiryPrice;
+    assignmentText = "커버드콜 배정됨";
+  } else {
+    coveredCallSharePnL = (expiryPrice - stockBasis) * shares;
+    remainingShares = shares;
+    stockValue = remainingShares * expiryPrice;
+    assignmentText = "커버드콜 미배정";
+  }
+
+  let putAssigned = false;
+  let putShares = 0;
+  let putPnL = 0;
+
+  if(putEnabled && expiryPrice < putStrike){
+    putAssigned = true;
+    putShares = putContracts * 100;
+    putPnL = (expiryPrice - putBasis) * putShares;
+    stockValue += putShares * expiryPrice;
+  }
+
+  const totalShares = remainingShares + putShares;
+
+  // 핵심:
+  // final = currentAccount + 옵션부채해소 + (현재계좌에 아직 반영되지 않은 만기 주식 손익 조정)
+  // 사용자가 이해하기 쉽게 직접형으로 계산:
+  // final = currentAccount + currentLiability + coveredCallSharePnL + putPnL
+  const finalAccount = currentAccount + currentLiability + coveredCallSharePnL + putPnL;
+
+  setText("finalAccountView", finalAccount, true);
+  setText("outCurrent", currentAccount, true);
+  setText("outLiability", currentLiability, true);
+  setText("outSharePnL", coveredCallSharePnL, true);
+  setText("outPutPnL", putPnL, true);
+  setText("outRemainingShares", remainingShares.toLocaleString("en-US"));
+  setText("outPutShares", putShares.toLocaleString("en-US"));
+  setText("outTotalShares", totalShares.toLocaleString("en-US"));
+  setText("outStockValue", stockValue, true);
+
+  const pill = document.getElementById("assignmentPill");
+  if(callAssigned){
+    pill.className = "pill assign";
+    pill.textContent = assignmentText + (putAssigned ? " + 셀풋 배정" : "");
+  } else {
+    pill.className = "pill keep";
+    pill.textContent = assignmentText + (putAssigned ? " + 셀풋 배정" : "");
+  }
+
+  let note = "";
+  if(callAssigned){
+    note += `만기 주가 ${expiryPrice}가 콜 행사가 ${callStrike} 이상이므로, ${callCoveredShares.toLocaleString("en-US")}주는 ${callStrike}에 팔리는 것으로 계산했습니다. `;
+  } else {
+    note += `만기 주가 ${expiryPrice}가 콜 행사가 ${callStrike} 아래이므로, 보유 주식 ${shares.toLocaleString("en-US")}주가 그대로 남는 것으로 계산했습니다. `;
+  }
+
+  if(putEnabled){
+    if(putAssigned){
+      note += `또한 셀풋 ${putContracts}계약은 배정되어 ${putShares.toLocaleString("en-US")}주가 추가된 것으로 계산했습니다.`;
+    } else {
+      note += `셀풋은 배정되지 않는 것으로 계산했습니다.`;
+    }
+  } else {
+    note += `셀풋은 계산에서 제외했습니다.`;
+  }
+
+  document.getElementById("summaryNote").textContent = note;
+}
+
+function loadExample(){
+  document.getElementById("currentAccount").value = 344469;
+  document.getElementById("currentLiability").value = 69600;
+  document.getElementById("shares").value = 15000;
+  document.getElementById("stockBasis").value = 17.54;
+  document.getElementById("callStrike").value = 16;
+  document.getElementById("callContracts").value = 150;
+  document.getElementById("expiryPrice").value = 16;
+  document.getElementById("putEnabled").value = "yes";
+  document.getElementById("putStrike").value = 15.5;
+  document.getElementById("putContracts").value = 20;
+  document.getElementById("putBasis").value = 15.5;
+  calculate();
+}
+calculate();
+</script>
+</body>
+</html>
