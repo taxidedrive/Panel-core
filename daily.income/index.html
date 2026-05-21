@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Income Dashboard</title>
+
+<style>
+body{
+    margin:0;
+    padding:20px;
+    background:#111;
+    color:white;
+    font-family:Arial;
+}
+
+.card{
+    background:#1b1b1b;
+    border-radius:15px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 0 10px rgba(0,0,0,0.4);
+}
+
+.title{
+    font-size:22px;
+    margin-bottom:15px;
+    color:#00ff99;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-top:8px;
+    margin-bottom:15px;
+    border:none;
+    border-radius:10px;
+    background:#2a2a2a;
+    color:white;
+    font-size:18px;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:#00aa66;
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.result{
+    font-size:24px;
+    margin-top:20px;
+    color:#00ff99;
+}
+
+.small{
+    color:#999;
+    font-size:14px;
+    margin-top:5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <div class="title">SOFI Daily Income</div>
+
+    <label>현재 옵션 채무 ($)</label>
+    <input type="number" id="debt" value="11520">
+
+    <label>오늘 녹은 금액 ($)</label>
+    <input type="number" id="decay" value="3360">
+
+    <label>현재 SOFI 가격</label>
+    <input type="number" id="price" value="15.6">
+
+    <button onclick="calculate()">계산하기</button>
+
+    <div class="result" id="result">
+        오늘 수익: $0
+    </div>
+
+    <div class="small">
+        옵션 채무 감소 + 세타 감소 계산
+    </div>
+</div>
+
+<script>
+
+function calculate(){
+
+    let debt = parseFloat(document.getElementById('debt').value);
+    let decay = parseFloat(document.getElementById('decay').value);
+    let price = parseFloat(document.getElementById('price').value);
+
+    let estimated = decay + ((16.5 - price) * 120 * 100);
+
+    document.getElementById('result').innerHTML =
+        "예상 계좌뷰 효과: $" + estimated.toFixed(2);
+
+}
+
+</script>
+
+</body>
+</html>
