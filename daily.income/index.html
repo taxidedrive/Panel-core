@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SOFI Premium Tracker PRO v1.0.3</title>
+
+<style>
+body{
+    margin:0;
+    background:#000;
+    color:#00ff99;
+    font-family:Arial, sans-serif;
+    padding:18px;
+}
+
+.header{
+    font-size:42px;
+    font-weight:900;
+    line-height:1.05;
+    margin-bottom:20px;
+}
+
+.version{
+    color:#999;
+    font-size:14px;
+    margin-top:10px;
+    margin-bottom:20px;
+}
+
+.card{
+    background:#0a0a0f;
+    border-radius:28px;
+    padding:24px;
+    margin-bottom:20px;
+    box-shadow:0 0 20px rgba(0,255,150,0.12);
+}
+
+.card-title{
+    font-size:30px;
+    font-weight:800;
+    line-height:1.2;
+    margin-bottom:20px;
+}
+
+.label{
+    color:#aaa;
+    font-size:16px;
+    margin-top:16px;
+}
+
+input{
+    width:100%;
+    padding:16px;
+    margin-top:8px;
+    border:none;
+    border-radius:16px;
+    background:#111;
+    color:#00ff99;
+    font-size:20px;
+    box-sizing:border-box;
+}
+
+button{
+    width:100%;
+    padding:18px;
+    margin-top:24px;
+    border:none;
+    border-radius:20px;
+    background:#00ff99;
+    color:#000;
+    font-size:22px;
+    font-weight:900;
+}
+
+.result{
+    margin-top:24px;
+    font-size:22px;
+    line-height:1.5;
+}
+
+.green{
+    color:#00ff99;
+}
+
+.white{
+    color:white;
+}
+
+.small{
+    font-size:14px;
+    color:#777;
+    margin-top:15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+💸 SOFI Premium<br>
+Tracker PRO
+</div>
+
+<div class="version">
+Version 1.0.3 • Updated 2026-05-21
+</div>
+
+<div class="card">
+
+<div class="card-title">
+현재 상태 입력
+</div>
+
+<div class="label">현재 옵션 채무 ($)</div>
+<input type="number" id="debt" placeholder="예: 15960">
+
+<div class="label">하루 예상 녹는 금액 ($)</div>
+<input type="number" id="daily" placeholder="예: 420">
+
+<div class="label">현재 누적 프리미엄 ($)</div>
+<input type="number" id="premium" placeholder="예: 28500">
+
+<button onclick="calc()">
+수익 계산하기
+</button>
+
+<div class="result" id="result"></div>
+
+</div>
+
+<script>
+function calc(){
+
+let debt = Number(document.getElementById('debt').value);
+let daily = Number(document.getElementById('daily').value);
+let premium = Number(document.getElementById('premium').value);
+
+let week = daily * 5;
+let month = daily * 20;
+
+let result = `
+<div class="green">
+📅 하루 예상 수익: $${daily.toFixed(2)}
+</div>
+
+<br>
+
+<div class="white">
+1주 예상: $${week.toFixed(2)}
+</div>
+
+<div class="white">
+1달 예상: $${month.toFixed(2)}
+</div>
+
+<br>
+
+<div class="green">
+현재 옵션 채무: $${debt.toFixed(2)}
+</div>
+
+<div class="green">
+누적 프리미엄: $${premium.toFixed(2)}
+</div>
+
+<div class="small">
+※ 옵션 채무가 시간가치로 녹으면서 계좌뷰 반영 예상
+</div>
+`;
+
+document.getElementById('result').innerHTML = result;
+}
+</script>
+
+</body>
+</html>
