@@ -1,16 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SOFI Premium Tracker PRO v1.0.3</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOFI Premium Tracker PRO v1.1</title>
 
 <style>
+
 body{
     margin:0;
     background:#000;
     color:#00ff99;
-    font-family:Arial, sans-serif;
+    font-family:Arial,sans-serif;
     padding:18px;
 }
 
@@ -18,47 +20,49 @@ body{
     font-size:42px;
     font-weight:900;
     line-height:1.05;
-    margin-bottom:20px;
+    margin-bottom:10px;
 }
 
 .version{
-    color:#999;
+    color:#888;
     font-size:14px;
-    margin-top:10px;
     margin-bottom:20px;
 }
 
 .card{
-    background:#0a0a0f;
+    background:#050510;
     border-radius:28px;
     padding:24px;
     margin-bottom:20px;
-    box-shadow:0 0 20px rgba(0,255,150,0.12);
+    box-shadow:0 0 25px rgba(0,255,150,0.12);
 }
 
 .card-title{
-    font-size:30px;
+    font-size:32px;
     font-weight:800;
-    line-height:1.2;
     margin-bottom:20px;
 }
 
 .label{
     color:#aaa;
     font-size:16px;
-    margin-top:16px;
+    margin-top:18px;
 }
 
 input{
     width:100%;
+    box-sizing:border-box;
     padding:16px;
     margin-top:8px;
     border:none;
-    border-radius:16px;
+    border-radius:18px;
     background:#111;
     color:#00ff99;
     font-size:20px;
-    box-sizing:border-box;
+}
+
+.upload{
+    border:1px solid #00ff99;
 }
 
 button{
@@ -74,24 +78,25 @@ button{
 }
 
 .result{
-    margin-top:24px;
+    margin-top:28px;
     font-size:22px;
-    line-height:1.5;
-}
-
-.green{
-    color:#00ff99;
-}
-
-.white{
-    color:white;
+    line-height:1.6;
 }
 
 .small{
-    font-size:14px;
     color:#777;
-    margin-top:15px;
+    font-size:14px;
+    margin-top:16px;
 }
+
+.good{
+    color:#00ff99;
+}
+
+.warn{
+    color:#ffcc00;
+}
+
 </style>
 </head>
 
@@ -103,7 +108,7 @@ Tracker PRO
 </div>
 
 <div class="version">
-Version 1.0.3 • Updated 2026-05-21
+Version 1.1 • Upload + Parsing Enabled
 </div>
 
 <div class="card">
@@ -112,14 +117,31 @@ Version 1.0.3 • Updated 2026-05-21
 현재 상태 입력
 </div>
 
-<div class="label">현재 옵션 채무 ($)</div>
+<div class="label">
+현재 옵션 채무 ($)
+</div>
 <input type="number" id="debt" placeholder="예: 15960">
 
-<div class="label">하루 예상 녹는 금액 ($)</div>
+<div class="label">
+하루 예상 녹는 금액 ($)
+</div>
 <input type="number" id="daily" placeholder="예: 420">
 
-<div class="label">현재 누적 프리미엄 ($)</div>
+<div class="label">
+현재 누적 프리미엄 ($)
+</div>
 <input type="number" id="premium" placeholder="예: 28500">
+
+<div class="label">
+데이터 업로드 (TXT / JSON)
+</div>
+
+<input
+type="file"
+id="uploadFile"
+class="upload"
+accept=".txt,.json"
+/>
 
 <button onclick="calc()">
 수익 계산하기
@@ -130,47 +152,161 @@ Version 1.0.3 • Updated 2026-05-21
 </div>
 
 <script>
+
+document
+.getElementById('uploadFile')
+.addEventListener('change', function(event){
+
+const file = event.target.files[0];
+
+if(!file){
+    return;
+}
+
+const reader = new FileReader();
+
+reader.onload = function(e){
+
+try{
+
+const text = e.target.result;
+
+let data;
+
+if(file.name.endsWith('.json')){
+    data = JSON.parse(text);
+}else{
+    data = parseTXT(text);
+}
+
+if(data.debt){
+    document.getElementById('debt').value = data.debt;
+}
+
+if(data.daily){
+    document.getElementById('daily').value = data.daily;
+}
+
+if(data.premium){
+    document.getElementById('premium').value = data.premium;
+}
+
+alert('업로드 및 파싱 완료');
+
+}catch(err){
+
+alert('파일 파싱 실패');
+
+}
+
+};
+
+reader.readAsText(file);
+
+});
+
+function parseTXT(text){
+
+let lines = text.split('\n');
+
+let result = {};
+
+lines.forEach(line=>{
+
+line = line.trim();
+
+if(line.includes('debt')){
+    result.debt = extractNumber(line);
+}
+
+if(line.includes('daily')){
+    result.daily = extractNumber(line);
+}
+
+if(line.includes('premium')){
+    result.premium = extractNumber(line);
+}
+
+});
+
+return result;
+
+}
+
+function extractNumber(str){
+
+const match = str.match(/[\d\.]+/);
+
+return match ? Number(match[0]) : 0;
+
+}
+
 function calc(){
 
-let debt = Number(document.getElementById('debt').value);
-let daily = Number(document.getElementById('daily').value);
-let premium = Number(document.getElementById('premium').value);
+let debt =
+Number(document.getElementById('debt').value);
+
+let daily =
+Number(document.getElementById('daily').value);
+
+let premium =
+Number(document.getElementById('premium').value);
 
 let week = daily * 5;
 let month = daily * 20;
 
-let result = `
-<div class="green">
-📅 하루 예상 수익: $${daily.toFixed(2)}
+let remainDays = 0;
+
+if(daily > 0){
+    remainDays = debt / daily;
+}
+
+document.getElementById('result').innerHTML = `
+
+<div class="good">
+📅 하루 예상 수익:
+$${daily.toFixed(2)}
 </div>
 
 <br>
 
-<div class="white">
-1주 예상: $${week.toFixed(2)}
+<div>
+1주 예상:
+$${week.toFixed(2)}
 </div>
 
-<div class="white">
-1달 예상: $${month.toFixed(2)}
+<div>
+1달 예상:
+$${month.toFixed(2)}
 </div>
 
 <br>
 
-<div class="green">
-현재 옵션 채무: $${debt.toFixed(2)}
+<div class="warn">
+현재 옵션 채무:
+$${debt.toFixed(2)}
 </div>
 
-<div class="green">
-누적 프리미엄: $${premium.toFixed(2)}
+<div class="good">
+누적 프리미엄:
+$${premium.toFixed(2)}
+</div>
+
+<br>
+
+<div>
+채무 예상 소멸일:
+약 ${remainDays.toFixed(1)} 일
 </div>
 
 <div class="small">
-※ 옵션 채무가 시간가치로 녹으면서 계좌뷰 반영 예상
+※ 옵션 시간가치 감소 기반 계산
 </div>
+
 `;
 
-document.getElementById('result').innerHTML = result;
 }
+
 </script>
 
 </body>
