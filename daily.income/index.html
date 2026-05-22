@@ -5,104 +5,111 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SOFI OCR Tracker PRO v2.1</title>
-
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<title>SOFI Premium Tracker PRO v3.0</title>
 
 <style>
 
 body{
-margin:0;
-padding:18px;
-background:#000;
-color:#00ff99;
-font-family:Arial,sans-serif;
+    margin:0;
+    padding:18px;
+    background:#000;
+    color:#00ff99;
+    font-family:Arial,sans-serif;
 }
 
 .header{
-font-size:42px;
-font-weight:900;
-line-height:1.05;
-margin-bottom:10px;
+    font-size:42px;
+    font-weight:900;
+    line-height:1.05;
+    margin-bottom:10px;
 }
 
 .version{
-color:#888;
-margin-bottom:25px;
+    color:#888;
+    margin-bottom:25px;
 }
 
 .card{
-background:#050510;
-border-radius:28px;
-padding:24px;
-margin-bottom:24px;
-box-shadow:0 0 25px rgba(0,255,150,0.12);
+    background:#050510;
+    border-radius:28px;
+    padding:24px;
+    margin-bottom:24px;
+    box-shadow:0 0 25px rgba(0,255,150,0.12);
 }
 
 .title{
-font-size:30px;
-font-weight:800;
-margin-bottom:20px;
-line-height:1.2;
+    font-size:30px;
+    font-weight:800;
+    margin-bottom:20px;
+    line-height:1.2;
 }
 
-.upload{
-width:100%;
-padding:18px;
-border-radius:18px;
-border:1px solid #00ff99;
-background:#111;
-color:#00ff99;
-box-sizing:border-box;
+.label{
+    color:#aaa;
+    margin-top:18px;
+    font-size:16px;
+}
+
+input{
+    width:100%;
+    padding:18px;
+    margin-top:8px;
+    border:none;
+    border-radius:18px;
+    background:#111;
+    color:#00ff99;
+    font-size:22px;
+    box-sizing:border-box;
 }
 
 button{
-width:100%;
-margin-top:20px;
-padding:20px;
-border:none;
-border-radius:20px;
-background:#00ff99;
-color:#000;
-font-size:24px;
-font-weight:900;
+    width:100%;
+    margin-top:20px;
+    padding:20px;
+    border:none;
+    border-radius:20px;
+    background:#00ff99;
+    color:#000;
+    font-size:24px;
+    font-weight:900;
 }
 
 .result{
-margin-top:25px;
-font-size:22px;
-line-height:1.7;
+    margin-top:25px;
+    font-size:22px;
+    line-height:1.7;
 }
 
 .good{
-color:#00ff99;
+    color:#00ff99;
 }
 
 .warn{
-color:#ffcc00;
+    color:#ffcc00;
 }
 
 .red{
-color:#ff6666;
+    color:#ff6666;
 }
 
 .small{
-color:#888;
-font-size:14px;
-margin-top:20px;
-word-break:break-word;
+    color:#888;
+    font-size:14px;
+    margin-top:20px;
 }
 
 .preview{
-width:100%;
-border-radius:20px;
-margin-top:20px;
+    width:100%;
+    border-radius:20px;
+    margin-top:20px;
+    display:none;
 }
 
-.loading{
-margin-top:20px;
-font-size:20px;
-color:#ffcc00;
+.saveBox{
+    background:#111;
+    border-radius:18px;
+    padding:18px;
+    margin-top:20px;
 }
 
 </style>
@@ -112,70 +119,127 @@ color:#ffcc00;
 <body>
 
 <div class="header">
-💸 SOFI OCR<br>
+💸 SOFI Premium<br>
 Tracker PRO
 </div>
 
 <div class="version">
-Version 2.1 • Android Fixed
+Version 3.0 • Stable Mobile Version
 </div>
 
 <div class="card">
 
 <div class="title">
-Robinhood 캡쳐 업로드
+Robinhood 캡쳐 저장
 </div>
 
 <input
 type="file"
 id="imageUpload"
-class="upload"
 accept="image/*"
 />
 
 <img
 id="preview"
 class="preview"
-style="display:none;"
+>
+
+<div class="label">
+SOFI 현재가
+</div>
+
+<input
+type="number"
+id="sofi"
+placeholder="15.71"
+/>
+
+<div class="label">
+Buying Power
+</div>
+
+<input
+type="number"
+id="buying"
+placeholder="54150"
+/>
+
+<div class="label">
+현재 옵션 채무
+</div>
+
+<input
+type="number"
+id="debt"
+placeholder="15960"
+/>
+
+<div class="label">
+누적 프리미엄
+</div>
+
+<input
+type="number"
+id="premium"
+placeholder="28500"
+/>
+
+<div class="label">
+하루 예상 Theta 수익
+</div>
+
+<input
+type="number"
+id="theta"
+placeholder="420"
+/>
 
 <button
 type="button"
-id="analyzeBtn"
-📸 OCR 분석 시작
+onclick="saveData()"
+>
+💾 저장 및 계산
 </button>
-
-<div
-id="loading"
-class="loading"
 
 <div
 id="result"
 class="result"
+></div>
+
+<div class="saveBox">
+
+<div class="small">
+📌 자동 저장 활성화
+</div>
+
+<div class="small">
+새로고침해도 데이터 유지
+</div>
+
+</div>
 
 </div>
 
 <script>
 
-let extractedText = "";
+window.onload = function(){
+
+loadData();
 
 document
-.getElementById('analyzeBtn')
-.addEventListener('click', analyzeImage);
+.getElementById('imageUpload')
+.addEventListener('change', previewImage);
 
-function analyzeImage(){
+};
+
+function previewImage(){
 
 const file =
 document
 .getElementById('imageUpload')
 .files[0];
 
-if(!file){
-
-alert("이미지를 선택하세요");
-
-return;
-
-}
+if(!file) return;
 
 const preview =
 document.getElementById('preview');
@@ -185,134 +249,152 @@ URL.createObjectURL(file);
 
 preview.style.display = "block";
 
-document
-.getElementById('loading')
-.innerHTML =
-"🔍 OCR 분석중...";
+}
+
+function saveData(){
+
+const data = {
+
+sofi:
+document.getElementById('sofi').value,
+
+buying:
+document.getElementById('buying').value,
+
+debt:
+document.getElementById('debt').value,
+
+premium:
+document.getElementById('premium').value,
+
+theta:
+document.getElementById('theta').value
+
+};
+
+localStorage.setItem(
+"sofiTracker",
+JSON.stringify(data)
+);
+
+calculate();
+
+}
+
+function loadData(){
+
+const saved =
+localStorage.getItem("sofiTracker");
+
+if(!saved) return;
+
+const data =
+JSON.parse(saved);
+
+document.getElementById('sofi').value =
+data.sofi || "";
+
+document.getElementById('buying').value =
+data.buying || "";
+
+document.getElementById('debt').value =
+data.debt || "";
+
+document.getElementById('premium').value =
+data.premium || "";
+
+document.getElementById('theta').value =
+data.theta || "";
+
+calculate();
+
+}
+
+function calculate(){
+
+const sofi =
+Number(document.getElementById('sofi').value);
+
+const buying =
+Number(document.getElementById('buying').value);
+
+const debt =
+Number(document.getElementById('debt').value);
+
+const premium =
+Number(document.getElementById('premium').value);
+
+const theta =
+Number(document.getElementById('theta').value);
+
+const week =
+theta * 5;
+
+const month =
+theta * 20;
+
+const effective =
+premium / 15000;
+
+const remain =
+theta > 0 ? debt / theta : 0;
 
 document
 .getElementById('result')
-.innerHTML = "";
+.innerHTML = `
 
-Tesseract.recognize(
-file,
-'eng',
-{
-logger:m=>console.log(m)
-}
-)
-
-.then(({data:{text}})=>{
-
-extractedText = text;
-
-document
-.getElementById('loading')
-.innerHTML =
-"✅ OCR 완료";
-
-parseRobinhood(text);
-
-})
-
-.catch(err=>{
-
-document
-.getElementById('loading')
-.innerHTML =
-"❌ OCR 실패";
-
-console.log(err);
-
-alert("OCR 오류 발생");
-
-});
-
-}
-
-function parseRobinhood(text){
-
-let resultHTML = "";
-
-const sofiPrice =
-text.match(/SOFI\s*\$`?(\d+\.\d+)/i);
-
-const buyingPower =
-text.match(/Buying\spower\s\`$?([\d,\.]+)/i);
-
-if(sofiPrice){
-
-resultHTML += &lt;div class="good"&gt; 📈 SOFI 현재가: ${sofiPrice[1]}
+<div class="good">
+📈 SOFI 현재가:
+$${sofi.toFixed(2)}
 </div>
-`;
 
-}
-
-if(buyingPower){
-
-resultHTML += &lt;div class="warn"&gt; 💰 Buying Power:${buyingPower[1]}
+<div class="warn">
+💰 Buying Power:
+$${buying.toFixed(2)}
 </div>
-`;
 
-}
-
-const premiumMatches =
-text.match(/\$`\d+\.\d+/g);
-
-if(premiumMatches){
-
-resultHTML += `
 <br>
 
 <div class="good">
-💵 발견된 옵션 가격:
-<br><br>
-${premiumMatches.join("&lt;br&gt;")} &lt;/div&gt;;
+📅 하루 예상 Theta:
+$${theta.toFixed(2)}
+</div>
 
-}
+<div class="good">
+1주 예상:
+$${week.toFixed(2)}
+</div>
 
-if(text.includes("16.5 Put")){
+<div class="good">
+1달 예상:
+$${month.toFixed(2)}
+</div>
 
-resultHTML += `
 <br>
 
 <div class="red">
-📉 16.5 Put 발견
+현재 옵션 채무:
+$${debt.toFixed(2)}
 </div>
-`;
 
-}
-
-if(text.includes("19.5 Put")){
-
-resultHTML += &lt;div class="red"&gt; 📉 19.5 Put 발견 &lt;/div&gt;;
-
-}
-
-if(text.includes("16 Call")){
-
-resultHTML += &lt;div class="good"&gt; 📈 16 Call 발견 &lt;/div&gt;;
-
-}
-
-resultHTML += `
-<div class="small">
-
-<br><br>
-
-OCR RAW TEXT:
-
-<br><br>
-
-${text.substring(0,1000)}
-
+<div class="good">
+누적 프리미엄:
+$${premium.toFixed(2)}
 </div>
-`;
 
-document
-.getElementById('result')
-.innerHTML =
-resultHTML;
+<br>
+
+<div class="warn">
+체감 평단 감소:
+$${effective.toFixed(2)} / share
+</div>
+
+<div class="warn">
+채무 예상 소멸:
+약 ${remain.toFixed(1)} 일
+</div>
+
+`;
 
 }
 
