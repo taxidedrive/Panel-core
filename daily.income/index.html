@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SOFI OCR Tracker PRO v2.1</title>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<style>
+
+body{
+margin:0;
+padding:18px;
+background:#000;
+color:#00ff99;
+font-family:Arial,sans-serif;
+}
+
+.header{
+font-size:42px;
+font-weight:900;
+line-height:1.05;
+margin-bottom:10px;
+}
+
+.version{
+color:#888;
+margin-bottom:25px;
+}
+
+.card{
+background:#050510;
+border-radius:28px;
+padding:24px;
+margin-bottom:24px;
+box-shadow:0 0 25px rgba(0,255,150,0.12);
+}
+
+.title{
+font-size:30px;
+font-weight:800;
+margin-bottom:20px;
+line-height:1.2;
+}
+
+.upload{
+width:100%;
+padding:18px;
+border-radius:18px;
+border:1px solid #00ff99;
+background:#111;
+color:#00ff99;
+box-sizing:border-box;
+}
+
+button{
+width:100%;
+margin-top:20px;
+padding:20px;
+border:none;
+border-radius:20px;
+background:#00ff99;
+color:#000;
+font-size:24px;
+font-weight:900;
+}
+
+.result{
+margin-top:25px;
+font-size:22px;
+line-height:1.7;
+}
+
+.good{
+color:#00ff99;
+}
+
+.warn{
+color:#ffcc00;
+}
+
+.red{
+color:#ff6666;
+}
+
+.small{
+color:#888;
+font-size:14px;
+margin-top:20px;
+word-break:break-word;
+}
+
+.preview{
+width:100%;
+border-radius:20px;
+margin-top:20px;
+}
+
+.loading{
+margin-top:20px;
+font-size:20px;
+color:#ffcc00;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+💸 SOFI OCR<br>
+Tracker PRO
+</div>
+
+<div class="version">
+Version 2.1 • Android Fixed
+</div>
+
+<div class="card">
+
+<div class="title">
+Robinhood 캡쳐 업로드
+</div>
+
+<input
+type="file"
+id="imageUpload"
+class="upload"
+accept="image/*"
+/>
+
+<img
+id="preview"
+class="preview"
+style="display:none;"
+
+<button
+type="button"
+id="analyzeBtn"
+📸 OCR 분석 시작
+</button>
+
+<div
+id="loading"
+class="loading"
+
+<div
+id="result"
+class="result"
+
+</div>
+
+<script>
+
+let extractedText = "";
+
+document
+.getElementById('analyzeBtn')
+.addEventListener('click', analyzeImage);
+
+function analyzeImage(){
+
+const file =
+document
+.getElementById('imageUpload')
+.files[0];
+
+if(!file){
+
+alert("이미지를 선택하세요");
+
+return;
+
+}
+
+const preview =
+document.getElementById('preview');
+
+preview.src =
+URL.createObjectURL(file);
+
+preview.style.display = "block";
+
+document
+.getElementById('loading')
+.innerHTML =
+"🔍 OCR 분석중...";
+
+document
+.getElementById('result')
+.innerHTML = "";
+
+Tesseract.recognize(
+file,
+'eng',
+{
+logger:m=>console.log(m)
+}
+)
+
+.then(({data:{text}})=>{
+
+extractedText = text;
+
+document
+.getElementById('loading')
+.innerHTML =
+"✅ OCR 완료";
+
+parseRobinhood(text);
+
+})
+
+.catch(err=>{
+
+document
+.getElementById('loading')
+.innerHTML =
+"❌ OCR 실패";
+
+console.log(err);
+
+alert("OCR 오류 발생");
+
+});
+
+}
+
+function parseRobinhood(text){
+
+let resultHTML = "";
+
+const sofiPrice =
+text.match(/SOFI\s*\$`?(\d+\.\d+)/i);
+
+const buyingPower =
+text.match(/Buying\spower\s\`$?([\d,\.]+)/i);
+
+if(sofiPrice){
+
+resultHTML += &lt;div class="good"&gt; 📈 SOFI 현재가: ${sofiPrice[1]}
+</div>
+`;
+
+}
+
+if(buyingPower){
+
+resultHTML += &lt;div class="warn"&gt; 💰 Buying Power:${buyingPower[1]}
+</div>
+`;
+
+}
+
+const premiumMatches =
+text.match(/\$`\d+\.\d+/g);
+
+if(premiumMatches){
+
+resultHTML += `
+<br>
+
+<div class="good">
+💵 발견된 옵션 가격:
+<br><br>
+${premiumMatches.join("&lt;br&gt;")} &lt;/div&gt;;
+
+}
+
+if(text.includes("16.5 Put")){
+
+resultHTML += `
+<br>
+
+<div class="red">
+📉 16.5 Put 발견
+</div>
+`;
+
+}
+
+if(text.includes("19.5 Put")){
+
+resultHTML += &lt;div class="red"&gt; 📉 19.5 Put 발견 &lt;/div&gt;;
+
+}
+
+if(text.includes("16 Call")){
+
+resultHTML += &lt;div class="good"&gt; 📈 16 Call 발견 &lt;/div&gt;;
+
+}
+
+resultHTML += `
+<div class="small">
+
+<br><br>
+
+OCR RAW TEXT:
+
+<br><br>
+
+${text.substring(0,1000)}
+
+</div>
+`;
+
+document
+.getElementById('result')
+.innerHTML =
+resultHTML;
+
+}
+
+</script>
+
+</body>
+</html>
