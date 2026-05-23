@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SOFI Daily Income Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+:root{
+  --bg:#071225;--card:#10213d;--card2:#0b1930;--line:#263a5e;
+  --text:#f6f8ff;--muted:#9eafc8;--green:#22c55e;--red:#ff7043;
+  --soft:#071326;--blue:#2f4b78;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:18px}
+h1{font-size:28px;margin:10px 0 8px}
+h2{font-size:24px;margin:6px 0 14px}
+p{color:var(--muted);line-height:1.45}
+.card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:24px;padding:16px;margin:16px 0}
+button{border:0;border-radius:16px;padding:14px 16px;font-weight:800;font-size:18px;color:white;background:var(--blue);width:100%;margin:8px 0}
+button.green{background:#11a861}
+input,select,textarea{width:100%;background:var(--soft);border:1px solid #2b4068;color:white;border-radius:14px;padding:11px;font-size:17px}
+textarea{min-height:135px;font-family:monospace}
+.preview{width:100%;border-radius:18px;border:1px solid var(--line);margin-top:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.box{background:#132746;border-radius:18px;padding:15px}
+.label{color:var(--muted);font-size:15px}
+.value{font-size:28px;font-weight:900;margin-top:5px}
+.small{font-size:13px;color:var(--muted)}
+.good{color:#5ee29c}.bad{color:#ff9c85}
+.optList{border-top:1px solid var(--line);margin-top:10px}
+.optRow{display:grid;grid-template-columns:1fr 120px;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding:14px 0}
+.optTitle{font-size:20px;font-weight:750}
+.optSub{font-size:16px;color:var(--muted);margin-top:3px}
+.pricePill{border:1px solid var(--green);color:var(--green);border-radius:12px;padding:10px 8px;text-align:center;font-size:20px;font-weight:900}
+.pricePill.put{border-color:var(--red);color:var(--red)}
+.editGrid{display:grid;grid-template-columns:70px 1fr 1fr;gap:8px;margin-top:10px}
+.editGrid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.rowbtn{font-size:14px;padding:10px;border-radius:12px;background:#243a61}
+details summary{cursor:pointer;font-size:22px;font-weight:900;margin:6px 0 12px}
+.family{white-space:pre-wrap;background:var(--soft);border:1px solid #2b4068;border-radius:16px;padding:14px;color:#dfe8f7;line-height:1.5}
+.stockRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>SOFI Daily Income Dashboard</h1>
+<p>위쪽은 로빈후드 리스트처럼 “보이는 항목” 중심, 아래 분석은 필요할 때 펼쳐서 확인합니다.</p>
+
+<div class="card">
+  <input id="file" type="file" accept="image/*">
+  <img id="preview" class="preview" style="display:none">
+  <button onclick="runOCR()">이미지 OCR 시도</button>
+  <div id="ocrStatus" class="small"></div>
+  <textarea id="ocrText" placeholder="OCR 결과 또는 직접 입력 텍스트"></textarea>
+  <button onclick="parseText()">텍스트 파싱 → 목록에 반영</button>
+</div>
+
+<div class="card">
+  <h2>계좌 요약</h2>
+  <div class="grid">
+    <div class="box"><div class="label">Buying Power</div><input id="buyingPower" type="number" step="0.01" value="58558.28"></div>
+    <div class="box"><div class="label">SOFI 현재가</div><input id="stockPrice" type="number" step="0.01" value="15.56"></div>
+    <div class="box"><div class="label">SOFI 주식수</div><input id="shares" type="number" step="1" value="15101"></div>
+    <div class="box"><div class="label">누적 프리미엄(선택)</div><input id="cumPremium" type="number" step="0.01" value="0"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>옵션 목록 <span class="small">(화면에 보이는 항목 중심)</span></h2>
+  <div id="optionList" class="optList"></div>
+  <button onclick="addOption()">옵션 줄 추가</button>
+  <button class="green" onclick="calculate()">계산하기</button>
+</div>
+
+<div class="card">
+  <h2>주식 보유</h2>
+  <div class="stockRow">
+    <div><div class="optTitle">SOFI</div><div class="optSub"><span id="sharesView">15101</span> shares</div></div>
+    <div class="pricePill put" id="stockPriceView">$15.56</div>
+  </div>
+</div>
+
+<details class="card" open>
+  <summary>분석 보기</summary>
+  <div class="grid">
+    <div class="box"><div class="label">SOFI 주식가치</div><div class="value" id="stockValue">$0.00</div></div>
+    <div class="box"><div class="label">옵션부채 합계</div><div class="value bad" id="optionLiability">$0.00</div></div>
+    <div class="box"><div class="label">대략 Net View</div><div class="value" id="netView">$0.00</div></div>
+    <div class="box"><div class="label">시간가치/부채 감소 잠재</div><div class="value good" id="decayPotential">$0.00</div></div>
+  </div>
+  <button class="green" onclick="saveRecord()">오늘 기록 저장</button>
+  <button onclick="exportCSV()">CSV 백업 다운로드</button>
+</details>
+
+<div class="card">
+  <h2>가족에게 보여줄 설명</h2>
+  <div id="familyText" class="family">계산 후 표시됩니다.</div>
+</div>
+
+<div class="card">
+  <h2>저장 기록</h2>
+  <div id="history"></div>
+</div>
+</div>
+
+<script>
+let imageDataUrl="", lastCalc=null;
+const fmt=n=>"$"+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+
+document.getElementById("file").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{imageDataUrl=r.result; const img=document.getElementById("preview"); img.src=imageDataUrl; img.style.display="block"};
+  r.readAsDataURL(f);
+});
+
+function addOption(d={}){
+  const list=document.getElementById("optionList");
+  const row=document.createElement("div");
+  row.className="optRow";
+  row.innerHTML=`
+    <div>
+      <div class="optTitle"><span class="sym">SOFI</span> $<span class="showStrike">${d.strike??""}</span> <span class="showType">${d.type??"Call"}</span></div>
+      <div class="optSub"><span class="showExp">${d.exp??""}</span> · <span class="showContracts">${d.contracts??""}</span> Sells</div>
+      <div class="editGrid">
+        <select class="type" onchange="calculate()"><option ${d.type==="Call"?"selected":""}>Call</option><option ${d.type==="Put"?"selected":""}>Put</option></select>
+        <input class="strike" type="number" step="0.5" value="${d.strike??""}" oninput="calculate()">
+        <input class="exp" placeholder="5/29" value="${d.exp??""}" oninput="calculate()">
+      </div>
+      <div class="editGrid2">
+        <input class="contracts" type="number" step="1" placeholder="계약수" value="${d.contracts??""}" oninput="calculate()">
+        <input class="price" type="number" step="0.01" placeholder="옵션가" value="${d.price??""}" oninput="calculate()">
+      </div>
+      <button class="rowbtn" onclick="this.closest('.optRow').remove();calculate()">이 줄 삭제</button>
+    </div>
+    <div class="pricePill ${d.type==="Put"?"put":""}">$${Number(d.price||0).toFixed(2)}</div>`;
+  list.appendChild(row);
+}
+
+function seed(){
+  addOption({type:"Call",strike:16.5,exp:"5/29",contracts:30,price:0.12});
+  addOption({type:"Call",strike:16,exp:"5/29",contracts:120,price:0.24});
+  addOption({type:"Put",strike:16.5,exp:"5/29",contracts:120,price:0.97});
+  addOption({type:"Put",strike:19.5,exp:"6/5",contracts:29,price:3.95});
+  calculate();
+}
+
+async function runOCR(){
+  if(!imageDataUrl){alert("먼저 이미지를 선택하세요.");return}
+  const st=document.getElementById("ocrStatus");
+  st.textContent="OCR 진행 중...";
+  try{
+    const res=await Tesseract.recognize(imageDataUrl,"eng",{logger:m=>{if(m.status)st.textContent=m.status+" "+Math.round((m.progress||0)*100)+"%"}});
+    document.getElementById("ocrText").value=res.data.text;
+    st.textContent="OCR 완료. 텍스트 파싱을 누르세요.";
+  }catch(e){st.textContent="OCR 실패: "+e.message}
+}
+function parseMoney(s){return Number(String(s).replace(/[$,\s]/g,""))}
+function parseText(){
+  const txt=document.getElementById("ocrText").value;
+  const lines=txt.split(/\n/).map(x=>x.trim()).filter(Boolean);
+  const bp=txt.match(/Buying\s*power\s*\$?\s*([\d,]+\.\d{2})/i);
+  if(bp)document.getElementById("buyingPower").value=parseMoney(bp[1]);
+  const sh=txt.match(/(\d{4,6})\s*shares/i);
+  if(sh)document.getElementById("shares").value=Number(sh[1]);
+  const pm=[...txt.matchAll(/\$\s*(1[0-9]\.\d{2})/g)].map(m=>parseMoney(m[1]));
+  if(pm.length)document.getElementById("stockPrice").value=pm[pm.length-1];
+
+  const rows=[];
+  for(let i=0;i<lines.length;i++){
+    const m=lines[i].match(/SOFI\s*\$?(\d+(?:\.\d+)?)\s*(Call|Put)/i);
+    if(m){
+      let exp="",contracts="",price="";
+      for(let j=i+1;j<Math.min(i+7,lines.length);j++){
+        const e=lines[j].match(/(\d{1,2}\/\d{1,2}).*?(\d+)\s*Sells/i);
+        if(e){exp=e[1];contracts=e[2]}
+        const p=lines[j].match(/\$\s*(\d+\.\d{2})/);
+        if(p&&!price)price=p[1];
+      }
+      rows.push({type:m[2][0].toUpperCase()+m[2].slice(1).toLowerCase(),strike:m[1],exp,contracts,price});
+    }
+  }
+  if(rows.length){
+    document.getElementById("optionList").innerHTML="";
+    rows.forEach(addOption);
+  }else alert("옵션 줄 자동 인식 실패. 목록에서 직접 수정하세요.");
+  calculate();
+}
+
+function getRows(){
+  return [...document.querySelectorAll(".optRow")].map(row=>{
+    const type=row.querySelector(".type").value;
+    const strike=Number(row.querySelector(".strike").value)||0;
+    const exp=row.querySelector(".exp").value;
+    const contracts=Number(row.querySelector(".contracts").value)||0;
+    const price=Number(row.querySelector(".price").value)||0;
+    const debt=contracts*price*100;
+    row.querySelector(".showStrike").textContent=strike;
+    row.querySelector(".showType").textContent=type;
+    row.querySelector(".showExp").textContent=exp;
+    row.querySelector(".showContracts").textContent=contracts;
+    const pill=row.querySelector(".pricePill");
+    pill.textContent="$"+price.toFixed(2);
+    pill.classList.toggle("put",type==="Put");
+    return {type,strike,exp,contracts,price,debt};
+  });
+}
+
+function calculate(){
+  const bp=Number(document.getElementById("buyingPower").value)||0;
+  const sp=Number(document.getElementById("stockPrice").value)||0;
+  const shares=Number(document.getElementById("shares").value)||0;
+  const rows=getRows();
+  const stockValue=sp*shares;
+  const liab=rows.reduce((a,r)=>a+r.debt,0);
+  const net=bp+stockValue-liab;
+  document.getElementById("sharesView").textContent=shares;
+  document.getElementById("stockPriceView").textContent=fmt(sp);
+  document.getElementById("stockValue").textContent=fmt(stockValue);
+  document.getElementById("optionLiability").textContent=fmt(liab);
+  document.getElementById("netView").textContent=fmt(net);
+  document.getElementById("decayPotential").textContent=fmt(liab);
+  const callDebt=rows.filter(r=>r.type==="Call").reduce((a,r)=>a+r.debt,0);
+  const putDebt=rows.filter(r=>r.type==="Put").reduce((a,r)=>a+r.debt,0);
+  lastCalc={time:new Date().toLocaleString(),bp,sp,shares,stockValue,liab,net,rows};
+  document.getElementById("familyText").textContent=
+`현재 화면은 로빈후드에 보이는 옵션 현재가를 기준으로 기록한 것입니다.
+
+SOFI 현재가: ${fmt(sp)}
+보유 주식수: ${shares.toLocaleString()}주
+주식가치: ${fmt(stockValue)}
+
+옵션 현재가를 계약수로 환산한 참고용 부채 합계: ${fmt(liab)}
+콜 쪽 부채: ${fmt(callDebt)}
+풋 쪽 부채: ${fmt(putDebt)}
+
+이 부채는 지금 확정 손실이라기보다, 매도한 옵션을 지금 다시 사서 닫는다면 필요한 시장가격입니다.
+시간이 지나고 주가가 크게 벗어나지 않으면 이 금액이 줄어들 수 있고, 그 감소가 계좌 안정과 수익으로 이어질 수 있습니다.
+
+핵심은 단기 예측보다 매일 같은 화면을 기록하면서 구조가 안정적으로 유지되는지 확인하는 것입니다.`;
+  renderHistory();
+}
+
+function saveRecord(){
+  calculate();
+  let h=JSON.parse(localStorage.getItem("sofiRecords")||"[]");
+  h.push(lastCalc);
+  localStorage.setItem("sofiRecords",JSON.stringify(h));
+  alert("저장되었습니다.");
+  renderHistory();
+}
+function renderHistory(){
+  const h=JSON.parse(localStorage.getItem("sofiRecords")||"[]");
+  const el=document.getElementById("history");
+  if(!h.length){el.innerHTML="<p class='small'>아직 저장 기록이 없습니다.</p>";return}
+  const last=h[h.length-1],prev=h.length>1?h[h.length-2]:null,diff=prev?last.net-prev.net:0;
+  el.innerHTML=h.slice(-10).reverse().map(r=>`<div class="box" style="margin:10px 0"><div class="label">${r.time}</div><div>SOFI ${fmt(r.sp)} / 옵션부채 ${fmt(r.liab)} / Net ${fmt(r.net)}</div></div>`).join("")+(prev?`<p>직전 대비 Net 변화: <b class="${diff>=0?'good':'bad'}">${fmt(diff)}</b></p>`:"");
+}
+function exportCSV(){
+  const h=JSON.parse(localStorage.getItem("sofiRecords")||"[]");
+  if(!h.length){alert("저장 기록이 없습니다.");return}
+  const rows=[["time","buyingPower","stockPrice","shares","stockValue","optionLiability","netView"]];
+  h.forEach(r=>rows.push([r.time,r.bp,r.sp,r.shares,r.stockValue,r.liab,r.net]));
+  const csv=rows.map(r=>r.join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="sofi_daily_records.csv";
+  a.click();
+}
+seed();renderHistory();
+</script>
+</body>
+</html>
